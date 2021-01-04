@@ -1,3 +1,1 @@
-(function () {
-	const board = Chessboard("board");
-});
+const board = Chessboard("board");
