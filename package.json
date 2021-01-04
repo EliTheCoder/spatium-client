@@ -1,0 +1,26 @@
+{
+	"name": "spatium-client",
+	"version": "1.0.0",
+	"description": "The web client for Spatium chess simulator",
+	"main": "src/index.js",
+	"scripts": {
+		"start": "nodemon src/index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/EliTheCoder/spatium-client.git"
+	},
+	"keywords": [],
+	"author": "EliTheCoder <elithecoder@elithecoder.com>",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/EliTheCoder/spatium-client/issues"
+	},
+	"homepage": "https://github.com/EliTheCoder/spatium-client#readme",
+	"dependencies": {
+		"express": "^4.17.1",
+		"fs": "0.0.1-security",
+		"http": "0.0.1-security",
+		"nodemon": "^2.0.6"
+	}
+}
