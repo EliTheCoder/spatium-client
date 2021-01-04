@@ -2,9 +2,9 @@
 	"name": "spatium-client",
 	"version": "1.0.0",
 	"description": "The web client for Spatium chess simulator",
-	"main": "src/index.js",
+	"main": "src/server/index.js",
 	"scripts": {
-		"start": "nodemon src/index.js"
+		"start": "nodemon src/server/index.js"
 	},
 	"repository": {
 		"type": "git",
