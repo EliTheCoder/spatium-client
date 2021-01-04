@@ -1,1 +1,5 @@
-const board = Chessboard("board");
+const boardConfig = {
+	position: "start"
+};
+
+const board = Chessboard("board", boardConfig);
