@@ -1,5 +1,6 @@
 const boardConfig = {
-	position: "start"
+	position: "start",
+	draggable: true
 };
 
 const board = Chessboard("board", boardConfig);

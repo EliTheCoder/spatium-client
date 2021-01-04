@@ -1,17 +1,17 @@
-const express = require("express");
-const http = require("http");
-const path = require("path");
-const fs = require("fs");
-const socketio = require("socket.io");
-const _ = require("lodash");
+import express, {static} from "express";
+import {createServer} from "http";
+import {join} from "path";
+import fs from "fs";
+import socketio from "socket.io";
+import _ from "lodash";
 require("better-logging")(console);
 
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 
 const io = socketio(server);
 
-app.use(express.static(path.join(__dirname, "../client")));
+app.use(static(join(__dirname, "../client")));
 
 io.on("connection", socket => {
 	console.log("client connected");
