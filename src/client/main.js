@@ -1,6 +1,3 @@
-const boardConfig = {
-	position: "start",
-	draggable: true
-};
-
-const board = Chessboard("board", boardConfig);
+$("#login").on("click", () => {
+	if 
+});

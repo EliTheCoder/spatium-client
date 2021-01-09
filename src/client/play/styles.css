@@ -1,8 +1,4 @@
-body {
-	background-color: #1c1e20;
-	font-family: "Inter";
-}
-#username-holder {
+#board {
 	width: 40%;
 	position: absolute;
 	left: 50%;
@@ -10,10 +6,9 @@ body {
 	-webkit-transform: translate(-50%, -50%);
 	transform: translate(-50%, -50%);
 }
-#login {
-	width: 100%;
-}
 
 * {
 	color: white;
+	background-color: #1c1e20;
+	font-family: "Inter";
 }
