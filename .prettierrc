@@ -5,10 +5,10 @@
 	"semi": true,
 	"singleQuote": false,
 	"trailingComma": "none",
-	"bracketSpacing": false,
-	"jsxBracketSameLine": true,
+	"bracketSpacing": true,
+	"jsxBracketSameLine": false,
 	"arrowParens": "avoid",
 	"requirePragma": false,
 	"insertPragma": false,
-	"proseWrap": "never"
+	"proseWrap": "always"
 }
