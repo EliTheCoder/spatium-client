@@ -34,16 +34,6 @@ class Home extends React.Component<WithRouterProps> {
 					onKeyPress={this.handleKeyPress}
 				></Input>
 				<Button onClick={this.handleSubmit}>Start</Button>
-				<style global jsx>{`
-					html,
-					body,
-					body > div:first-child,
-					div#__next,
-					div#__next > div,
-					div#__next > div > div {
-						height: 100%;
-					}
-				`}</style>
 			</Center>
 		);
 	}
