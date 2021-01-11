@@ -11,6 +11,7 @@ import {
 	NumberInputField,
 	NumberInputStepper,
 	Select,
+	Skeleton,
 	Tab,
 	Table,
 	TabList,
@@ -53,37 +54,10 @@ class RoomList extends React.Component {
 							</Tr>
 						</Thead>
 						<Tbody>
-							<Tr>
-								<Td>EliTheCoder</Td>
-								<Td>776</Td>
-								<Td>10+0</Td>
-								<Td>Custom</Td>
-								<Td>
-									<IconButton
-										aria-label="Accept"
-										icon={<CheckIcon />}
-									/>
-								</Td>
-							</Tr>
-							<Tr>
-								<Td>AlexCheese</Td>
-								<Td>1072</Td>
-								<Td>2+1</Td>
-								<Td>Standard</Td>
-								<Td>
-									<IconButton
-										aria-label="Accept"
-										icon={<CheckIcon />}
-									/>
-								</Td>
-							</Tr>
-							<Room
-								name="Huday"
-								rating="803"
-								time="10+0"
-								mode="4D Standard"
-								id="4801"
-							/>
+							<SkeletonRoom />
+							<SkeletonRoom />
+							<SkeletonRoom />
+							<SkeletonRoom />
 						</Tbody>
 					</Table>
 				</Box>
@@ -128,6 +102,32 @@ class Room extends React.Component<RoomProps> {
 						icon={<CheckIcon />}
 						href={"/" + this.id}
 					/>
+				</Td>
+			</Tr>
+		);
+	}
+}
+
+class SkeletonRoom extends React.Component {
+	render() {
+		return (
+			<Tr>
+				<Td>
+					<Skeleton>Name</Skeleton>
+				</Td>
+				<Td>
+					<Skeleton>Rating</Skeleton>
+				</Td>
+				<Td>
+					<Skeleton>Time</Skeleton>
+				</Td>
+				<Td>
+					<Skeleton>Mode</Skeleton>
+				</Td>
+				<Td>
+					<Skeleton w="100%">
+						<IconButton aria-label="Accept" icon={<CheckIcon />} />
+					</Skeleton>
 				</Td>
 			</Tr>
 		);
