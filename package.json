@@ -1,26 +1,18 @@
 {
 	"name": "spatium-client",
-	"version": "0.1.0",
-	"private": true,
+	"version": "0.1.1",
 	"license": "GPL-3.0",
 	"scripts": {
-		"dev": "next dev",
-		"build": "next build",
-		"start": "next start"
+		"dev": "parcel src/**/*",
+		"build": "parcel build src/**/*"
 	},
 	"dependencies": {
-		"@chakra-ui/icons": "^1.0.2",
-		"@chakra-ui/react": "^1.1.2",
-		"@emotion/react": "^11.1.4",
-		"@emotion/styled": "^11.0.0",
-		"framer-motion": "^3.2.0",
-		"next": "10.0.5",
-		"react": "17.0.1",
-		"react-dom": "17.0.1",
-		"typescript": "^4.1.3"
+		"p5": "^1.4.0",
+		"typescript": "^4.1.3",
+		"parcel": "^2.0.0-rc.0"
 	},
 	"devDependencies": {
 		"@types/node": "^14.14.20",
-		"@types/react": "^17.0.0"
+		"@types/p5": "^1.3.1"
 	}
 }
