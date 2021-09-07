@@ -1,0 +1,45 @@
+import p5 from "p5";
+import { world } from "./world";
+
+let width = 1920;
+let height = 1080;
+
+export function sketch(p: p5) {
+	function canvasSize(w: number, h: number) {
+		let aw = w / 16;
+		let ah = h / 9;
+		let diff = aw - ah;
+		if (diff > 0) {
+			w = (h * 16) / 9;
+		} else {
+			h = (w * 9) / 16;
+		}
+		return [w, h];
+	}
+
+	p.windowResized = () => {
+		let [w, h] = canvasSize(window.innerWidth, window.innerHeight);
+		[width, height] = [w, h];
+		p.resizeCanvas(w, h);
+	};
+
+	p.setup = () => {
+		let [w, h] = canvasSize(window.innerWidth, window.innerHeight);
+		p.createCanvas(w, h);
+		[width, height] = [w, h];
+		p.colorMode(p.HSB, 255);
+		p.frameRate(60);
+		p.noStroke();
+		p.rectMode(p.CORNER);
+		p.ellipseMode(p.CENTER);
+	};
+
+	p.draw = () => {
+		p.scale(p.width / 1920, p.height / 1080);
+		world(p);
+	};
+}
+
+export function convertDimension(x: number, y: number) {
+	return [(x / width) * 1920, (y / height) * 1080];
+}
