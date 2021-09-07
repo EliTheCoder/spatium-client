@@ -2,6 +2,10 @@ import { convertDimension } from "./sketch";
 import { board } from "./board";
 import p5 from "p5";
 
+
+
+export type Camera = {x: number, y: number, z: number};
+
 let camera = { x: 0, y: 0, z: 1 };
 let oldX = 0;
 let oldY = 0;
@@ -18,7 +22,7 @@ export function world(p: p5) {
 	oldY = cy;
 	p.scale(camera.z);
 	p.translate(-camera.x, -camera.y);
-	board(p);
+	board(p, camera);
 
 	p.mouseWheel = (event: WheelEvent) => {
 		const dz = event.deltaY / -500;
