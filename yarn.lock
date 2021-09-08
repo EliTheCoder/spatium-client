@@ -2699,6 +2699,11 @@ highlight.js@~9.12.0:
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.12.0.tgz#e6d9dbe57cbefe60751f02af336195870c90c01e"
   integrity sha1-5tnb5Xy+/mB1HwKvM2GVhwyQwB4=
 
+hika@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/hika/-/hika-1.0.2.tgz#737f6f2ea77950021d36b2fb5ac85a41ceec3e26"
+  integrity sha512-kTLxzycJvDoRsCcWO5dLjdC0aWNzLCmHaTNeUKDmZsSxCeungV250d5Md/KoMOr75wRLMR3X6nADGKMIr41VYA==
+
 hmac-drbg@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/hmac-drbg/-/hmac-drbg-1.0.1.tgz#d2745701025a6c775a6c545793ed502fc0c649a1"

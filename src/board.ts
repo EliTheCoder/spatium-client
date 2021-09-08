@@ -1,5 +1,5 @@
 import p5 from "p5";
-import { Game, Vec } from "./hika";
+import { Game, Vec } from "hika";
 import { Camera } from "./world";
 import { convertDimension } from "./sketch";
 
@@ -75,15 +75,6 @@ export function board(p: p5, camera: Camera) {
 	}
 	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
 	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
-	let hoverPos = convertPixelDimensions(new Vec(cx, cy));
-	if (game.isInBounds(hoverPos) && game.getPiece(hoverPos) !== null) {
-		let moves = game.getMoves(hoverPos);
-		for (let move of moves) {
-			let { x, y } = convertBoardDimensions(move.dst);
-			p.fill(0, 0, 0, 100);
-			p.ellipse(x + squareSize / 2, y + squareSize / 2, squareSize / 2);
-		}
-	}
 
 	p.noStroke();
 	p.fill(0, 0, 255, 64);
@@ -92,8 +83,17 @@ export function board(p: p5, camera: Camera) {
 		cy - mod(cy, squareSize),
 		squareSize,
 		squareSize,
-		8
+		4
 	);
+
+	if (selected !== null) {
+		let moves = game.getMoves(selected);
+		for (let move of moves) {
+			let { x, y } = convertBoardDimensions(move.dst);
+			p.fill(0, 0, 0, 64);
+			p.ellipse(x + squareSize / 2, y + squareSize / 2, squareSize / 4);
+		}
+	}
 }
 
 function tile(p: p5, pos: Vec) {
@@ -111,4 +111,17 @@ function tile(p: p5, pos: Vec) {
 		pieceImage = images[(piece.team ? "b" : "w") + "0"];
 	} else pieceImage = images[pieceName];
 	p.image(pieceImage, cPos.x, cPos.y, squareSize, squareSize);
+}
+
+export function mousePressed(p: p5, camera: Camera) {
+	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
+	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
+	let pos = convertPixelDimensions(new Vec(cx, cy));
+	if (game.isInBounds(pos) && game.getPiece(pos) !== null) {
+		if (selected == pos) selected = null;
+		else selected = pos;
+	} else {
+		selected = null;
+	}
+	return false;
 }

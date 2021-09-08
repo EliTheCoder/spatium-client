@@ -1,10 +1,8 @@
 import { convertDimension } from "./sketch";
-import { board } from "./board";
+import { board, mousePressed } from "./board";
 import p5 from "p5";
 
-
-
-export type Camera = {x: number, y: number, z: number};
+export type Camera = { x: number; y: number; z: number };
 
 let camera = { x: 0, y: 0, z: 1 };
 let oldX = 0;
@@ -47,6 +45,7 @@ export function world(p: p5) {
 		if (p.mouseButton == p.CENTER) {
 			dragging = true;
 		}
+		mousePressed(p, camera);
 	};
 
 	p.mouseReleased = () => {
