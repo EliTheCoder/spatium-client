@@ -1,4 +1,5 @@
 import p5 from "p5";
+import { loadImages } from "./board";
 import { world } from "./world";
 
 let width = 1920;
@@ -23,6 +24,10 @@ export function sketch(p: p5) {
 		p.resizeCanvas(w, h);
 	};
 
+	p.preload = () => {
+		loadImages(p);
+	};
+	
 	p.setup = () => {
 		let [w, h] = canvasSize(window.innerWidth, window.innerHeight);
 		p.createCanvas(w, h);
@@ -32,6 +37,7 @@ export function sketch(p: p5) {
 		p.noStroke();
 		p.rectMode(p.CORNER);
 		p.ellipseMode(p.CENTER);
+		p.smooth();
 	};
 
 	p.draw = () => {
