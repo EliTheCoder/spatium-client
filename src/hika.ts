@@ -43,15 +43,14 @@ type PieceRule = {
 	pathTree: Path[];
 };
 
-// type Move = [src: Vec, dst: Vec];
-type Move = {
+export type Move = {
 	src: Vec;
 	dst: Vec;
-	atk?: Vec[];
+	int?: Vec[];
 }
 
 export class Game {
-	private size: Vec;
+	private readonly size: Vec;
 	private layout: (Piece | null)[][][][] = [];
 	private pieceDict: { [id: string]: PieceRule } = {};
 
@@ -65,7 +64,7 @@ export class Game {
 		this.size = new Vec(parseInt(rawBoardSizeArr[0]), parseInt(rawBoardSizeArr[1]), parseInt(rawBoardSizeArr[2]), parseInt(rawBoardSizeArr[3]));
 
 		// Initialize layout
-		let wInput = inputArr[1].split("|");
+		let wInput = inputArr[1] ? inputArr[1].split("|") : [];
 		for (let w = 0; this.layout.length < this.size.w; w++) {
 			let wLayer = [];
 			let zInput = wInput[w] ? wInput[w].split("/") : [];
@@ -235,11 +234,16 @@ export class Game {
 	}
 
 	public getSize(): Vec {
-		return this.size;
+		return new Vec(this.size.x, this.size.y, this.size.z, this.size.w);
 	}
 
-	public setSize(size: Vec) {
-		this.size = size;
+	public isInBounds(pos: Vec): Boolean {
+		if (pos.x >= 0 && pos.x < this.size.x
+			&& pos.y >= 0 && pos.y < this.size.y
+			&& pos.z >= 0 && pos.z < this.size.z
+			&& pos.w >= 0 && pos.w < this.size.w)
+			return true;
+		else return false;
 	}
 
 	public getPiece(pos: Vec): Piece | null {
@@ -264,7 +268,7 @@ export class Game {
 		return target;
 	}
 
-	public getMoves(pos: Vec): Move[] {
+	public getMoves(pos: Vec, kingCheck: Boolean = true): Move[] {
 		let moves: Move[] = [];
 		let piece = this.getPiece(pos);
 		if (piece === null) return [];
@@ -276,6 +280,14 @@ export class Game {
 				attack: null
 			};
 			moves = moves.concat(this.evaluatePath(piece, pos, path, stats));
+		}
+
+		if (kingCheck) {
+			for (let [ind, mov] of moves.entries()) {
+				if (this.putsKingInCheck(mov)) {
+					moves.splice(ind, 1);
+				}
+			}
 		}
 
 		return moves;
@@ -378,33 +390,54 @@ export class Game {
 		return moves;
 	}
 
+	public forPiece(fn: Function) {
+		for (let w = 0; w < this.size.w && w < this.layout.length; w++) {
+			for (let z = 0; z < this.size.z && this.layout[w].length; z++) {
+				for (let y = 0; y < this.size.y && this.layout[w][z].length; y++) {
+					for (let x = 0; x < this.size.x && this.layout[w][z][y].length; x++) {
+						let loc = new Vec(x, y, z, w);
+						fn(loc, this.getPiece(loc));
+					}
+				}
+			}
+		}
+	}
+
+	public putsKingInCheck(mov: Move): Boolean {
+		let piece: Piece | null = this.getPiece(mov.src);
+		if (piece == null) return false;
+		let layoutClone = JSON.parse(JSON.stringify(this.layout));
+		let taken = this.move(mov);
+		let kings: Vec[] = [];
+		this.forPiece((loc: Vec, target: Piece | null) => {
+			if (target && piece && target.id === 'K' && target.team !== piece.team)
+				kings.push(loc);
+		});
+		let moves = this.getMovesForTeam(piece.team ? 0 : 1, false);
+		this.layout = layoutClone;
+		for (let m of moves) {
+			if (kings.includes(m.dst)) return true;
+		}
+		return false;
+	}
+
 	public moveIfValid(mov: Move): Piece | null | Boolean {
 		if (this.isValidMove(mov)) {
 			return this.move(mov);
 		} else return false;
 	}
 
-	public isValidMove(mov: Move): Boolean {
+	public isValidMove(mov: Move, kingCheck: Boolean = true): Boolean {
 		let moves = this.getMoves(mov.src);
 		return moves.includes(mov);
 	}
 
-	public getMovesForTeam(team: number): Move[] {
+	public getMovesForTeam(team: number, kingCheck: Boolean = true): Move[] {
 		let moves: Move[] = [];
-		for (let w = 0; w < this.size.w; w++) {
-			for (let z = 0; z < this.size.z; z++) {
-				for (let y = 0; y < this.size.z; y++) {
-					for (let x = 0; x < this.size.z; x++) {
-						let loc = new Vec(x, y, z, w);
-						let piece = this.getPiece(loc);
-						if (piece === null) continue;
-						if (piece.team === team) {
-							moves = moves.concat(this.getMoves(loc));
-						}
-					}
-				}
-			}
-		}
+		this.forPiece((loc: Vec, piece: Piece | null) => {
+			if (piece && piece.team === team)
+				moves = moves.concat(this.getMoves(loc, kingCheck));
+		});
 		return moves;
 	}
 }

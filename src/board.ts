@@ -5,7 +5,8 @@ import { convertDimension } from "./sketch";
 
 const squareSize = 50;
 
-let game = new Game("4,4,2,4 RNBQ,PPPP/KBNR,PPPP|||,,pppp,rnbq/,,pppp,kbnr");
+// let game = new Game("4,4,2,4 RNBQ,PPPP/KBNR,PPPP|||,,pppp,rnbq/,,pppp,kbnr");
+let game = new Game();
 
 let selected: null | Vec = null;
 
@@ -74,6 +75,16 @@ export function board(p: p5, camera: Camera) {
 	}
 	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
 	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
+	let hoverPos = convertPixelDimensions(new Vec(cx, cy));
+	if (game.isInBounds(hoverPos) && game.getPiece(hoverPos) !== null) {
+		let moves = game.getMoves(hoverPos);
+		for (let move of moves) {
+			let { x, y } = convertBoardDimensions(move.dst);
+			p.fill(0, 0, 0, 100);
+			p.ellipse(x + squareSize / 2, y + squareSize / 2, squareSize / 2);
+		}
+	}
+
 	p.noStroke();
 	p.fill(0, 0, 255, 64);
 	p.rect(
