@@ -34,6 +34,6 @@ yarn-error.log*
 .vercel
 
 /dist/
-/.parcel-cache/
+.parcel-cache/
 .parcel-cache/afe98bc648be144e.txt
 .parcel-cache/data.mdb
