@@ -87,7 +87,6 @@ export function board(p: p5, camera: Camera) {
 	let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
 	if (holding !== null && game.getPiece(holding) !== null) {
 		let piece = game.getPiece(holding);
-		if (piece === null) return;
 		const pieceName = (piece.team ? "b" : "w") + piece.id.toUpperCase();
 		let pieceImage: p5.Image;
 		if (!images[pieceName]) {
@@ -146,10 +145,7 @@ export function mouseReleased(p: p5, camera: Camera) {
 	holding = null;
 	if (!game.isInBounds(pos)) return;
 	let move = { src: selected, dst: pos };
-	console.log(move);
-	console.log(game.isValidMove(move));
-	let moveResult = game.moveIfValid(move);
-	console.log(moveResult);
+	let moveResult = game.move(move);
 	if (selected && selected.equals(pos) && !preSelected) selected = null;
 }
 
