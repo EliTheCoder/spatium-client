@@ -5,35 +5,25 @@ import { convertDimension } from "./sketch";
 
 const squareSize = 50;
 
-// let game = new Game("4,4,2,4 RNBQ,PPPP/KBNR,PPPP|||,,pppp,rnbq/,,pppp,kbnr");
-let game = new Game();
+let game = new Game("4,4,2,4 RNBQ,PPPP/KBNR,PPPP|||,,pppp,rnbq/,,pppp,kbnr");
+// let game = new Game();
 
 let selected: null | Vec = null;
+let preSelected: boolean = false;
+let holding: null | Vec = null;
 
 let images: { [key: string]: p5.Image } = {};
 export function loadImages(p: p5) {
-	let pieceNames = [
-		"bB",
-		"bK",
-		"bN",
-		"bP",
-		"bQ",
-		"bR",
-		"b0",
-		"wB",
-		"wK",
-		"wN",
-		"wP",
-		"wQ",
-		"wR",
-		"w0"
-	];
-	for (let pieceName of pieceNames) {
-		images[pieceName] = p.loadImage(`./assets/cburnett/${pieceName}.png`);
+	let imageFiles: string[] = [].slice
+		.call(document.getElementsByTagName("img"))
+		.map((a: HTMLImageElement) => a.src);
+	for (let imagePath of imageFiles) {
+		const pieceName = imagePath.split("/").slice(-1).join("").split(".")[0];
+		images[pieceName] = p.loadImage(imagePath);
 	}
 }
 
-function convertBoardDimensions(pos: Vec) {
+function board2pix(pos: Vec) {
 	const size = game.getSize();
 	const nPos = new Vec(
 		pos.x,
@@ -46,7 +36,7 @@ function convertBoardDimensions(pos: Vec) {
 		nPos.y * squareSize + nPos.w * (size.y * squareSize + squareSize)
 	);
 }
-function convertPixelDimensions(pos: Vec) {
+function pix2board(pos: Vec) {
 	const size = game.getSize();
 	const nPos = new Vec(
 		mod(Math.floor(pos.x / squareSize), size.x + 1),
@@ -68,7 +58,7 @@ export function board(p: p5, camera: Camera) {
 		for (let y = 0; y < size.y; y++) {
 			for (let z = 0; z < size.z; z++) {
 				for (let w = 0; w < size.w; w++) {
-					tile(p, new Vec(x, y, z, w));
+					tile(p, new Vec(x, y, z, w), camera);
 				}
 			}
 		}
@@ -89,24 +79,29 @@ export function board(p: p5, camera: Camera) {
 	if (selected !== null) {
 		let moves = game.getMoves(selected);
 		for (let move of moves) {
-			let { x, y } = convertBoardDimensions(move.dst);
+			let { x, y } = board2pix(move.dst);
 			p.fill(0, 0, 0, 64);
 			p.ellipse(x + squareSize / 2, y + squareSize / 2, squareSize / 4);
 		}
 	}
+	let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
 }
 
-function tile(p: p5, pos: Vec) {
+function tile(p: p5, pos: Vec, camera: Camera) {
 	let { x, y, z, w } = pos;
-	const cPos = convertBoardDimensions(pos);
+	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
+	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
+	let cPos;
+	cPos = board2pix(pos);
 	const color = (x + y + z + w) % 2;
 	const hue = (w + z) % 2;
 	p.fill(0, 0, (color ? 160 : 40) + (hue ? 0 : 40));
 	p.rect(cPos.x, cPos.y, squareSize, squareSize, 4);
+	if (holding && pos.equals(holding)) return;
 	let piece = game.getPiece(pos);
 	if (piece === null) return;
 	const pieceName = (piece.team ? "b" : "w") + piece.id.toUpperCase();
-	let pieceImage;
+	let pieceImage: p5.Image;
 	if (!images[pieceName]) {
 		pieceImage = images[(piece.team ? "b" : "w") + "0"];
 	} else pieceImage = images[pieceName];
@@ -116,12 +111,23 @@ function tile(p: p5, pos: Vec) {
 export function mousePressed(p: p5, camera: Camera) {
 	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
 	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
-	let pos = convertPixelDimensions(new Vec(cx, cy));
+	let pos = pix2board(new Vec(cx, cy));
 	if (game.isInBounds(pos) && game.getPiece(pos) !== null) {
-		if (selected == pos) selected = null;
-		else selected = pos;
+		holding = pos;
+		preSelected = true;
+		if (selected && selected.equals(pos)) preSelected = false;
+		if (!selected || !selected.equals(pos)) selected = pos;
 	} else {
 		selected = null;
 	}
 	return false;
+}
+
+export function mouseReleased(p: p5, camera: Camera) {
+	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
+	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
+	let pos = pix2board(new Vec(cx, cy));
+	let moveResult = game.moveIfValid({ src: holding, dst: pos });
+	holding = null;
+	if (selected && selected.equals(pos) && !preSelected) selected = null;
 }
