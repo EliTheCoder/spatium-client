@@ -1,5 +1,5 @@
 import p5 from "p5";
-import { Game, Vec } from "hika";
+import { Game, Move, Vec } from "hika";
 import { Camera } from "./world";
 import { convertDimension } from "./sketch";
 
@@ -58,7 +58,7 @@ export function board(p: p5, camera: Camera) {
 		for (let y = 0; y < size.y; y++) {
 			for (let z = 0; z < size.z; z++) {
 				for (let w = 0; w < size.w; w++) {
-					tile(p, new Vec(x, y, z, w), camera);
+					tile(p, new Vec(x, y, z, w));
 				}
 			}
 		}
@@ -85,13 +85,28 @@ export function board(p: p5, camera: Camera) {
 		}
 	}
 	let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
+	if (holding !== null && game.getPiece(holding) !== null) {
+		let piece = game.getPiece(holding);
+		if (piece === null) return;
+		const pieceName = (piece.team ? "b" : "w") + piece.id.toUpperCase();
+		let pieceImage: p5.Image;
+		if (!images[pieceName]) {
+			pieceImage = images[(piece.team ? "b" : "w") + "0"];
+		} else pieceImage = images[pieceName];
+
+		p.image(
+			pieceImage,
+			heldPiecePos.x,
+			heldPiecePos.y,
+			squareSize,
+			squareSize
+		);
+	}
 }
 
-function tile(p: p5, pos: Vec, camera: Camera) {
+function tile(p: p5, pos: Vec) {
 	let { x, y, z, w } = pos;
-	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
-	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
-	let cPos;
+	let cPos: Vec;
 	cPos = board2pix(pos);
 	const color = (x + y + z + w) % 2;
 	const hue = (w + z) % 2;
@@ -124,10 +139,20 @@ export function mousePressed(p: p5, camera: Camera) {
 }
 
 export function mouseReleased(p: p5, camera: Camera) {
+	if (p.mouseButton !== p.LEFT) return;
 	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
 	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
 	let pos = pix2board(new Vec(cx, cy));
-	let moveResult = game.moveIfValid({ src: holding, dst: pos });
 	holding = null;
+	if (!game.isInBounds(pos)) return;
+	let move = { src: selected, dst: pos };
+	console.log(move);
+	console.log(game.isValidMove(move));
+	let moveResult = game.moveIfValid(move);
+	console.log(moveResult);
 	if (selected && selected.equals(pos) && !preSelected) selected = null;
+}
+
+function movesEqual(a: Move, b: Move) {
+	return a.src.equals(b.src) && a.dst.equals(b.dst);
 }
