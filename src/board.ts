@@ -14,6 +14,7 @@ let game = new Game("4,4,2,4 RNBQ,PPPP/KBNR,PPPP|||,,pppp,rnbq/,,pppp,kbnr");
 let selected: null | Vec = null;
 let preSelected: boolean = false;
 let holding: null | Vec = null;
+let possibleMoves: Move[] = [];
 
 // Loading images for the pieces
 let images: { [key: string]: p5.Image } = {};
@@ -97,7 +98,7 @@ export function board(p: p5, camera: Camera) {
 	);
 
 	// Drawing dots for each possible move
-	drawPlaceholders(p, game, selected, squareSize);
+	drawPlaceholders(p, game, possibleMoves, squareSize);
 
 	// Drawing the currently held piece under mouse
 	let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
@@ -152,7 +153,7 @@ export function mousePressed(p: p5, camera: Camera) {
 	} else {
 		selected = null;
 	}
-	return false;
+	updatePossibleMoves(game);
 }
 
 export function mouseReleased(p: p5, camera: Camera) {
@@ -168,6 +169,12 @@ export function mouseReleased(p: p5, camera: Camera) {
 		selected = null;
 	}
 	holding = null;
+	updatePossibleMoves(game);
+}
+
+function updatePossibleMoves(game: Game) {
+	if (selected === null) possibleMoves = [];
+	else possibleMoves = game.getMoves(selected);
 }
 
 function movesEqual(a: Move, b: Move) {

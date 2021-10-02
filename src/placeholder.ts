@@ -5,18 +5,15 @@ import { board2pix, tileColor } from "./board";
 export function drawPlaceholders(
 	p: p5,
 	game: Game,
-	selected: Vec | null,
+	possibleMoves: Move[],
 	squareSize: number
 ) {
-	if (selected === null) return;
-	const moves = game.getMoves(selected);
-	if (moves.length === 0) return;
-	let dot = p.createGraphics(squareSize, squareSize);
-	dot.noStroke();
-	dot.fill(0, 0, 0, 128);
-	dot.ellipse(squareSize / 2, squareSize / 2, squareSize / 4, squareSize / 4);
-	for (const move of moves) {
-		placeholder(p, game, move, squareSize, dot);
+	if (possibleMoves.length === 0) return;
+
+	let images = drawImages(p, squareSize);
+
+	for (const move of possibleMoves) {
+		placeholder(p, game, move, squareSize, images);
 	}
 }
 
@@ -25,9 +22,50 @@ function placeholder(
 	game: Game,
 	move: Move,
 	squareSize: number,
-	dot: p5.Graphics
+	{ dot, tris }: { dot: p5.Graphics; tris: p5.Graphics }
 ) {
 	let { x, y } = board2pix(move.dst);
 	p.fill(0, 0, tileColor(move.dst) - 64);
-	p.image(dot, x, y, squareSize, squareSize);
+	if (game.getPiece(move.dst) === null) {
+		p.image(dot, x, y);
+	} else {
+		p.image(tris, x, y);
+	}
+}
+
+function drawImages(p: p5, squareSize: number) {
+	let dot = p.createGraphics(squareSize, squareSize);
+	let tris = p.createGraphics(squareSize, squareSize);
+	dot.noStroke();
+	tris.noStroke();
+	dot.fill(0, 0, 0, 64);
+	tris.fill(0, 0, 0, 64);
+	dot.ellipse(squareSize / 2, squareSize / 2, squareSize / 4);
+	tris.triangle(0, 0, squareSize / 4, 0, 0, squareSize / 4);
+	tris.triangle(
+		squareSize,
+		0,
+		squareSize - squareSize / 4,
+		0,
+		squareSize,
+		squareSize / 4
+	);
+	tris.triangle(
+		squareSize,
+		squareSize,
+		squareSize - squareSize / 4,
+		squareSize,
+		squareSize,
+		squareSize - squareSize / 4
+	);
+	tris.triangle(
+		0,
+		squareSize,
+		squareSize / 4,
+		squareSize,
+		0,
+		squareSize - squareSize / 4
+	);
+
+	return { dot, tris };
 }
