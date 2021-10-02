@@ -113,7 +113,7 @@ function tile(p: p5, pos: Vec) {
 	const color = (x + y + z + w) % 2;
 	const hue = (w + z) % 2;
 	p.fill(0, 0, (color ? 160 : 40) + (hue ? 0 : 40));
-	p.rect(cPos.x, cPos.y, squareSize, squareSize, 4);
+	p.rect(cPos.x, cPos.y, squareSize, squareSize);
 	let piece = game.getPiece(pos);
 	if (piece === null) return;
 	const pieceName = (piece.team ? "b" : "w") + piece.id.toUpperCase();
@@ -123,12 +123,12 @@ function tile(p: p5, pos: Vec) {
 	} else pieceImage = images[pieceName];
 	if (selected && pos.equals(selected) && holding === null) {
 		p.fill(0, 0, 0, 128);
-		p.rect(cPos.x, cPos.y, squareSize, squareSize, 4);
+		p.rect(cPos.x, cPos.y, squareSize, squareSize);
 	}
 	p.image(pieceImage, cPos.x, cPos.y, squareSize, squareSize);
 	if (holding && pos.equals(holding)) {
 		p.fill(0, 0, 0, 64);
-		p.rect(cPos.x, cPos.y, squareSize, squareSize, 4);
+		p.rect(cPos.x, cPos.y, squareSize, squareSize);
 	}
 }
 
