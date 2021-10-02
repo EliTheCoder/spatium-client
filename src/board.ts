@@ -3,16 +3,19 @@ import { Game, Move, Vec } from "hika";
 import { Camera } from "./world";
 import { convertDimension } from "./sketch";
 import { drawPlaceholders } from "./placeholder";
+import { tile } from "./tile";
 
 const squareSize = 50;
 
+// Creating the game board
 let game = new Game("4,4,2,4 RNBQ,PPPP/KBNR,PPPP|||,,pppp,rnbq/,,pppp,kbnr");
-// let game = new Game();
 
+// Creating variables for movement
 let selected: null | Vec = null;
 let preSelected: boolean = false;
 let holding: null | Vec = null;
 
+// Loading images for the pieces
 let images: { [key: string]: p5.Image } = {};
 export function loadImages(p: p5) {
 	let imageFiles: string[] = [].slice
@@ -24,6 +27,7 @@ export function loadImages(p: p5) {
 	}
 }
 
+// Function that takes board coordinates and returns pixel coordinates
 export function board2pix(pos: Vec) {
 	const size = game.getSize();
 	const nPos = new Vec(
@@ -37,6 +41,8 @@ export function board2pix(pos: Vec) {
 		nPos.y * squareSize + nPos.w * (size.y * squareSize + squareSize)
 	);
 }
+
+// Function that takes pixel coordinates and returns board coordinates
 export function pix2board(pos: Vec) {
 	const size = game.getSize();
 	const nPos = new Vec(
@@ -48,25 +54,38 @@ export function pix2board(pos: Vec) {
 	return new Vec(nPos.x, -nPos.y + size.y - 1, nPos.z, -nPos.w + size.w - 1);
 }
 
+// Modulo function
 const mod = (a: number, n: number) => ((a % n) + n) % n;
 
+// Function that draws the board
 export function board(p: p5, camera: Camera) {
 	let size = game.getSize();
-	p.textAlign(p.CENTER, p.CENTER);
 	p.noStroke();
-	p.textSize(squareSize);
+
+	// Drawing tile for each board square
 	for (let x = 0; x < size.x; x++) {
 		for (let y = 0; y < size.y; y++) {
 			for (let z = 0; z < size.z; z++) {
 				for (let w = 0; w < size.w; w++) {
-					tile(p, new Vec(x, y, z, w));
+					tile(
+						p,
+						new Vec(x, y, z, w),
+						game,
+						selected,
+						holding,
+						squareSize,
+						images
+					);
 				}
 			}
 		}
 	}
+
+	// Get world coordinates of the mouse
 	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
 	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
 
+	// Drawing highlight under the mouse
 	p.noStroke();
 	p.fill(0, 0, 255, 64);
 	p.rect(
@@ -77,8 +96,10 @@ export function board(p: p5, camera: Camera) {
 		4
 	);
 
+	// Drawing dots for each possible move
 	drawPlaceholders(p, game, selected, squareSize);
 
+	// Drawing the currently held piece under mouse
 	let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
 	if (holding !== null && game.getPiece(holding) !== null) {
 		let piece = game.getPiece(holding);
@@ -98,25 +119,14 @@ export function board(p: p5, camera: Camera) {
 	}
 }
 
-function tile(p: p5, pos: Vec) {
-	let cPos = board2pix(pos);
-	p.fill(0, 0, tileColor(pos));
-	p.rect(cPos.x, cPos.y, squareSize, squareSize);
+export function pieceImage(pos: Vec, game: Game) {
 	let piece = game.getPiece(pos);
-	if (piece === null) return;
-	const pieceName = (piece.team ? "b" : "w") + piece.id.toUpperCase();
-	let pieceImage: p5.Image;
+	if (piece === null) return null;
+	let pieceName = (piece.team ? "b" : "w") + piece.id.toUpperCase();
 	if (!images[pieceName]) {
-		pieceImage = images[(piece.team ? "b" : "w") + "0"];
-	} else pieceImage = images[pieceName];
-	p.fill(160, 255, 255, 64);
-	if (selected && pos.equals(selected) && holding === null) {
-		p.rect(cPos.x, cPos.y, squareSize, squareSize);
+		pieceName = (piece.team ? "b" : "w") + "0";
 	}
-	p.image(pieceImage, cPos.x, cPos.y, squareSize, squareSize);
-	if (holding && pos.equals(holding)) {
-		p.rect(cPos.x, cPos.y, squareSize, squareSize);
-	}
+	return images[pieceName];
 }
 
 export function tileColor(pos: Vec) {
