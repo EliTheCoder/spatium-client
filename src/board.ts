@@ -80,8 +80,11 @@ export function board(p: p5, camera: Camera) {
 		let moves = game.getMoves(selected);
 		for (let move of moves) {
 			let { x, y } = board2pix(move.dst);
-			p.fill(0, 0, 0, 64);
+			p.push();
+			p.stroke(0, 0, 255, 128);
+			p.fill(0, 0, 0, 128);
 			p.ellipse(x + squareSize / 2, y + squareSize / 2, squareSize / 4);
+			p.pop();
 		}
 	}
 	let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
@@ -111,7 +114,6 @@ function tile(p: p5, pos: Vec) {
 	const hue = (w + z) % 2;
 	p.fill(0, 0, (color ? 160 : 40) + (hue ? 0 : 40));
 	p.rect(cPos.x, cPos.y, squareSize, squareSize, 4);
-	if (holding && pos.equals(holding)) return;
 	let piece = game.getPiece(pos);
 	if (piece === null) return;
 	const pieceName = (piece.team ? "b" : "w") + piece.id.toUpperCase();
@@ -119,7 +121,15 @@ function tile(p: p5, pos: Vec) {
 	if (!images[pieceName]) {
 		pieceImage = images[(piece.team ? "b" : "w") + "0"];
 	} else pieceImage = images[pieceName];
+	if (selected && pos.equals(selected) && holding === null) {
+		p.fill(0, 0, 0, 128);
+		p.rect(cPos.x, cPos.y, squareSize, squareSize, 4);
+	}
 	p.image(pieceImage, cPos.x, cPos.y, squareSize, squareSize);
+	if (holding && pos.equals(holding)) {
+		p.fill(0, 0, 0, 64);
+		p.rect(cPos.x, cPos.y, squareSize, squareSize, 4);
+	}
 }
 
 export function mousePressed(p: p5, camera: Camera) {
