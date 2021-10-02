@@ -123,6 +123,7 @@ function tile(p: p5, pos: Vec) {
 }
 
 export function mousePressed(p: p5, camera: Camera) {
+	if (p.mouseButton !== p.LEFT) return;
 	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
 	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
 	let pos = pix2board(new Vec(cx, cy));
@@ -131,6 +132,9 @@ export function mousePressed(p: p5, camera: Camera) {
 		preSelected = true;
 		if (selected && selected.equals(pos)) preSelected = false;
 		if (!selected || !selected.equals(pos)) selected = pos;
+	} else if (game.getMoves(selected).some(move => move.dst.equals(pos))) {
+		game.move({ src: selected, dst: pos });
+		selected = null;
 	} else {
 		selected = null;
 	}
@@ -142,11 +146,14 @@ export function mouseReleased(p: p5, camera: Camera) {
 	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
 	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
 	let pos = pix2board(new Vec(cx, cy));
-	holding = null;
 	if (!game.isInBounds(pos)) return;
-	let move = { src: selected, dst: pos };
-	let moveResult = game.move(move);
 	if (selected && selected.equals(pos) && !preSelected) selected = null;
+	if (holding && game.getMoves(holding).some(move => move.dst.equals(pos))) {
+		game.move({ src: holding, dst: pos });
+		holding = null;
+		selected = null;
+	}
+	holding = null;
 }
 
 function movesEqual(a: Move, b: Move) {
