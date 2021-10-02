@@ -2,6 +2,7 @@ import p5 from "p5";
 import { Game, Move, Vec } from "hika";
 import { Camera } from "./world";
 import { convertDimension } from "./sketch";
+import { drawPlaceholders } from "./placeholder";
 
 const squareSize = 50;
 
@@ -23,7 +24,7 @@ export function loadImages(p: p5) {
 	}
 }
 
-function board2pix(pos: Vec) {
+export function board2pix(pos: Vec) {
 	const size = game.getSize();
 	const nPos = new Vec(
 		pos.x,
@@ -36,7 +37,7 @@ function board2pix(pos: Vec) {
 		nPos.y * squareSize + nPos.w * (size.y * squareSize + squareSize)
 	);
 }
-function pix2board(pos: Vec) {
+export function pix2board(pos: Vec) {
 	const size = game.getSize();
 	const nPos = new Vec(
 		mod(Math.floor(pos.x / squareSize), size.x + 1),
@@ -76,17 +77,8 @@ export function board(p: p5, camera: Camera) {
 		4
 	);
 
-	if (selected !== null) {
-		let moves = game.getMoves(selected);
-		for (let move of moves) {
-			let { x, y } = board2pix(move.dst);
-			p.push();
-			p.stroke(0, 0, 255, 128);
-			p.fill(0, 0, 0, 128);
-			p.ellipse(x + squareSize / 2, y + squareSize / 2, squareSize / 4);
-			p.pop();
-		}
-	}
+	drawPlaceholders(p, game, selected, squareSize);
+
 	let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
 	if (holding !== null && game.getPiece(holding) !== null) {
 		let piece = game.getPiece(holding);
@@ -107,12 +99,8 @@ export function board(p: p5, camera: Camera) {
 }
 
 function tile(p: p5, pos: Vec) {
-	let { x, y, z, w } = pos;
-	let cPos: Vec;
-	cPos = board2pix(pos);
-	const color = (x + y + z + w) % 2;
-	const hue = (w + z) % 2;
-	p.fill(0, 0, (color ? 160 : 40) + (hue ? 0 : 40));
+	let cPos = board2pix(pos);
+	p.fill(0, 0, tileColor(pos));
 	p.rect(cPos.x, cPos.y, squareSize, squareSize);
 	let piece = game.getPiece(pos);
 	if (piece === null) return;
@@ -121,15 +109,21 @@ function tile(p: p5, pos: Vec) {
 	if (!images[pieceName]) {
 		pieceImage = images[(piece.team ? "b" : "w") + "0"];
 	} else pieceImage = images[pieceName];
+	p.fill(160, 255, 255, 64);
 	if (selected && pos.equals(selected) && holding === null) {
-		p.fill(0, 0, 0, 128);
 		p.rect(cPos.x, cPos.y, squareSize, squareSize);
 	}
 	p.image(pieceImage, cPos.x, cPos.y, squareSize, squareSize);
 	if (holding && pos.equals(holding)) {
-		p.fill(0, 0, 0, 64);
 		p.rect(cPos.x, cPos.y, squareSize, squareSize);
 	}
+}
+
+export function tileColor(pos: Vec) {
+	let { x, y, z, w } = pos;
+	const color = (x + y + z + w) % 2;
+	const hue = (w + z) % 2;
+	return (color ? 160 : 40) + (hue ? 0 : 40);
 }
 
 export function mousePressed(p: p5, camera: Camera) {
