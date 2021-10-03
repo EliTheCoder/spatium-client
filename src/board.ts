@@ -11,6 +11,7 @@ let game = new Game("4,4,2,4 RNBQ,PPPP/KBNR,PPPP|||,,pppp,rnbq/,,pppp,kbnr");
 
 // Creating variables for movement
 let selected: null | Vec = null;
+let oldSelected: null | Vec = null;
 let preSelected: boolean = false;
 let holding: null | Vec = null;
 let possibleMoves: Move[] = [];
@@ -170,7 +171,9 @@ export function mousePressed(p: p5, event: MouseEvent) {
 		holding = pos;
 		preSelected = true;
 		if (selected && selected.equals(pos)) preSelected = false;
-		if (!selected || !selected.equals(pos)) selected = pos;
+		if (!selected || !selected.equals(pos)) {
+			selected = pos;
+		}
 	} else if (
 		selected !== null &&
 		game.getMoves(selected).some(move => move.dst.equals(pos))
@@ -190,10 +193,13 @@ export function mouseReleased(p: p5, event: MouseEvent) {
 	let pos = pix2board(new Vec(cx, cy));
 	if (!game.isInBounds(pos)) {
 		holding = null;
+		selected = null;
 		updatePossibleMoves();
 		return;
 	}
-	if (selected && selected.equals(pos) && !preSelected) selected = null;
+	if (selected && selected.equals(pos) && !preSelected) {
+		selected = null;
+	}
 	if (holding && game.getMoves(holding).some(move => move.dst.equals(pos))) {
 		game.move({ src: holding, dst: pos });
 		lastMove = { src: holding, dst: pos };
@@ -207,6 +213,7 @@ export function mouseReleased(p: p5, event: MouseEvent) {
 function updatePossibleMoves() {
 	if (selected === null) possibleMoves = [];
 	else {
+		if (oldSelected !== null && selected.equals(oldSelected)) return;
 		let { x, y, z } = game.getSize();
 		if (possibleMovesCache.has(getVecIndex(selected, x, y, z))) {
 			possibleMoves = possibleMovesCache.get(
@@ -220,6 +227,7 @@ function updatePossibleMoves() {
 			);
 		}
 	}
+	oldSelected = selected;
 }
 
 function getVecIndex(vec: Vec, i: number, j: number, k: number) {
