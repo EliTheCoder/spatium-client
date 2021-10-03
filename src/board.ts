@@ -1,7 +1,6 @@
 import p5 from "p5";
 import { Game, Move, Vec } from "hika";
-import { Camera } from "./world";
-import { convertDimension } from "./sketch";
+import { Camera, screen2world } from "./world";
 import { drawPlaceholders } from "./placeholder";
 import { tile } from "./tile";
 
@@ -77,7 +76,8 @@ export function board(p: p5, camera: Camera) {
 						holding,
 						squareSize,
 						images,
-						lastMove
+						lastMove,
+						camera
 					);
 				}
 			}
@@ -85,8 +85,7 @@ export function board(p: p5, camera: Camera) {
 	}
 
 	// Get world coordinates of the mouse
-	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
-	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
+	const [cx, cy] = screen2world(p.mouseX, p.mouseY);
 
 	// Drawing highlight under the mouse
 	p.noStroke();
@@ -139,10 +138,9 @@ export function tileColor(pos: Vec) {
 	return (color ? 160 : 40) + (hue ? 0 : 40);
 }
 
-export function mousePressed(p: p5, camera: Camera) {
+export function mousePressed(p: p5) {
 	if (p.mouseButton !== p.LEFT) return;
-	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
-	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
+	const [cx, cy] = screen2world(p.mouseX, p.mouseY);
 	let pos = pix2board(new Vec(cx, cy));
 	if (!game.isInBounds(pos)) {
 		selected = null;
@@ -170,10 +168,9 @@ export function mousePressed(p: p5, camera: Camera) {
 	updatePossibleMoves(game);
 }
 
-export function mouseReleased(p: p5, camera: Camera) {
+export function mouseReleased(p: p5) {
 	if (p.mouseButton !== p.LEFT) return;
-	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
-	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
+	const [cx, cy] = screen2world(p.mouseX, p.mouseY);
 	let pos = pix2board(new Vec(cx, cy));
 	if (!game.isInBounds(pos)) {
 		holding = null;

@@ -2,9 +2,9 @@ import { convertDimension } from "./sketch";
 import { board, mousePressed, mouseReleased } from "./board";
 import p5 from "p5";
 
-export type Camera = { x: number; y: number; z: number };
+export type Camera = { x: number; y: number; z: number; r: number };
 
-let camera = { x: 0, y: 0, z: 1 };
+let camera: Camera = { x: 0, y: 0, z: 1, r: 0 };
 let oldX = 0;
 let oldY = 0;
 let dragging = false;
@@ -20,6 +20,7 @@ export function world(p: p5) {
 	oldY = cy;
 	p.scale(camera.z);
 	p.translate(-camera.x, -camera.y);
+	p.rotate(camera.r);
 	board(p, camera);
 
 	p.mouseWheel = (event: WheelEvent) => {
@@ -45,13 +46,25 @@ export function world(p: p5) {
 		if (p.mouseButton === p.CENTER || p.mouseButton === p.RIGHT) {
 			dragging = true;
 		}
-		mousePressed(p, camera);
+		mousePressed(p);
 	};
 
 	p.mouseReleased = () => {
 		if (p.mouseButton === p.CENTER || p.mouseButton === p.RIGHT) {
 			dragging = false;
 		}
-		mouseReleased(p, camera);
+		mouseReleased(p);
 	};
+}
+
+export function screen2world(x: number, y: number): [number, number] {
+	const [ax, ay] = convertDimension(x, y);
+	const [bx, by] = [ax / camera.z + camera.x, ay / camera.z + camera.y];
+	let dist = Math.sqrt(bx * bx + by * by);
+	let angle = Math.atan2(by, bx);
+	const [cx, cy] = [
+		Math.cos(angle - camera.r) * dist,
+		Math.sin(angle - camera.r) * dist
+	];
+	return [cx, cy];
 }

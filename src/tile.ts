@@ -1,6 +1,7 @@
 import { Game, Move, Vec } from "hika";
 import p5 from "p5";
 import { board2pix, tileColor } from "./board";
+import { Camera } from "./world";
 
 export function tile(
 	p: p5,
@@ -10,7 +11,8 @@ export function tile(
 	holding: Vec | null,
 	squareSize: number,
 	images: { [key: string]: p5.Image },
-	lastMove: Move | null
+	lastMove: Move | null,
+	camera: Camera
 ) {
 	// Getting world pixel coordinates of the tile
 	let cPos = board2pix(pos);
@@ -51,7 +53,25 @@ export function tile(
 	}
 
 	// Drawing piece
-	p.image(pieceImage, cPos.x, cPos.y, squareSize, squareSize);
+	p.push();
+	p.rotate(-camera.r);
+	const [bx, by] = [cPos.x, cPos.y];
+	let dist = Math.sqrt(bx * bx + by * by);
+	let angle = Math.atan2(by, bx);
+	const [cx, cy] = [
+		Math.cos(angle + camera.r) * dist,
+		Math.sin(angle + camera.r) * dist
+	];
+
+	// Don't ask me why this works, but it centers the piece on the tile
+	const [dx, dy] = [
+		((Math.sqrt(2) / 2) * Math.cos(camera.r + Math.PI / 4) - 0.5) *
+			squareSize,
+		((Math.sqrt(2) / 2) * Math.sin(camera.r + Math.PI / 4) - 0.5) *
+			squareSize
+	];
+	p.image(pieceImage, cx + dx, cy + dy, squareSize, squareSize);
+	p.pop();
 
 	// Drawing selection overlay after the piece if holding
 	if (holding && pos.equals(holding)) {
