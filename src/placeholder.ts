@@ -10,65 +10,50 @@ export function drawPlaceholders(
 ) {
 	if (possibleMoves.length === 0) return;
 
-	let images = drawImages(p, squareSize);
-
 	for (const move of possibleMoves) {
-		placeholder(p, game, move, squareSize, images);
+		placeholder(p, game, move, squareSize);
 	}
 }
 
-function placeholder(
-	p: p5,
-	game: Game,
-	move: Move,
-	squareSize: number,
-	{ dot, tris }: { dot: p5.Graphics; tris: p5.Graphics }
-) {
+function placeholder(p: p5, game: Game, move: Move, squareSize: number) {
 	let { x, y } = board2pix(move.dst);
-	p.fill(0, 0, tileColor(move.dst) - 64);
+	p.fill(160, 192, 128, 192);
+	p.stroke(0, 0, 255, 192);
 	if (game.getPiece(move.dst) === null) {
-		p.image(dot, x, y);
+		p.ellipse(
+			x + squareSize / 2,
+			y + squareSize / 2,
+			squareSize / 4,
+			squareSize / 4
+		);
 	} else {
-		p.image(tris, x, y);
+		p.push();
+		p.translate(x, y);
+		p.triangle(0, 0, squareSize / 4, 0, 0, squareSize / 4);
+		p.triangle(
+			squareSize,
+			0,
+			squareSize - squareSize / 4,
+			0,
+			squareSize,
+			squareSize / 4
+		);
+		p.triangle(
+			squareSize,
+			squareSize,
+			squareSize - squareSize / 4,
+			squareSize,
+			squareSize,
+			squareSize - squareSize / 4
+		);
+		p.triangle(
+			0,
+			squareSize,
+			squareSize / 4,
+			squareSize,
+			0,
+			squareSize - squareSize / 4
+		);
+		p.pop();
 	}
-}
-
-function drawImages(p: p5, squareSize: number) {
-	let dot = p.createGraphics(squareSize, squareSize);
-	let tris = p.createGraphics(squareSize, squareSize);
-	dot.noStroke();
-	tris.noStroke();
-	// p.fill(160, 255, 255, 64);
-	dot.colorMode(p.HSB, 255);
-	tris.colorMode(p.HSB, 255);
-	dot.fill(160, 128, 255, 192);
-	tris.fill(160, 128, 255, 192);
-	dot.ellipse(squareSize / 2, squareSize / 2, squareSize / 4);
-	tris.triangle(0, 0, squareSize / 4, 0, 0, squareSize / 4);
-	tris.triangle(
-		squareSize,
-		0,
-		squareSize - squareSize / 4,
-		0,
-		squareSize,
-		squareSize / 4
-	);
-	tris.triangle(
-		squareSize,
-		squareSize,
-		squareSize - squareSize / 4,
-		squareSize,
-		squareSize,
-		squareSize - squareSize / 4
-	);
-	tris.triangle(
-		0,
-		squareSize,
-		squareSize / 4,
-		squareSize,
-		0,
-		squareSize - squareSize / 4
-	);
-
-	return { dot, tris };
 }

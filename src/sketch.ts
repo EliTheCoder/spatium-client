@@ -1,5 +1,6 @@
 import p5 from "p5";
 import { loadImages } from "./board";
+import { overlay } from "./overlay";
 import { world } from "./world";
 
 let width = 1920;
@@ -27,13 +28,13 @@ export function sketch(p: p5) {
 	p.preload = () => {
 		loadImages(p);
 	};
-	
+
 	p.setup = () => {
 		let [w, h] = canvasSize(window.innerWidth, window.innerHeight);
 		p.createCanvas(w, h);
 		[width, height] = [w, h];
 		p.colorMode(p.HSB, 255);
-		p.frameRate(60);
+		p.frameRate(120);
 		p.noStroke();
 		p.rectMode(p.CORNER);
 		p.ellipseMode(p.CENTER);
@@ -43,6 +44,7 @@ export function sketch(p: p5) {
 	p.draw = () => {
 		p.scale(p.width / 1920, p.height / 1080);
 		world(p);
+		overlay(p);
 	};
 }
 

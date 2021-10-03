@@ -138,14 +138,14 @@ export function tileColor(pos: Vec) {
 	return (color ? 160 : 40) + (hue ? 0 : 40);
 }
 
-export function mousePressed(p: p5) {
-	if (p.mouseButton !== p.LEFT) return;
+export function mousePressed(p: p5, event: MouseEvent) {
+	if (event.button !== 0) return;
 	const [cx, cy] = screen2world(p.mouseX, p.mouseY);
 	let pos = pix2board(new Vec(cx, cy));
 	if (!game.isInBounds(pos)) {
 		selected = null;
 		holding = null;
-		updatePossibleMoves(game);
+		updatePossibleMoves();
 		return;
 	}
 	if (
@@ -158,23 +158,26 @@ export function mousePressed(p: p5) {
 		preSelected = true;
 		if (selected && selected.equals(pos)) preSelected = false;
 		if (!selected || !selected.equals(pos)) selected = pos;
-	} else if (game.getMoves(selected).some(move => move.dst.equals(pos))) {
+	} else if (
+		selected !== null &&
+		game.getMoves(selected).some(move => move.dst.equals(pos))
+	) {
 		game.move({ src: selected, dst: pos });
 		lastMove = { src: selected, dst: pos };
 		selected = null;
 	} else {
 		selected = null;
 	}
-	updatePossibleMoves(game);
+	updatePossibleMoves();
 }
 
-export function mouseReleased(p: p5) {
-	if (p.mouseButton !== p.LEFT) return;
+export function mouseReleased(p: p5, event: MouseEvent) {
+	if (event.button !== 0) return;
 	const [cx, cy] = screen2world(p.mouseX, p.mouseY);
 	let pos = pix2board(new Vec(cx, cy));
 	if (!game.isInBounds(pos)) {
 		holding = null;
-		updatePossibleMoves(game);
+		updatePossibleMoves();
 		return;
 	}
 	if (selected && selected.equals(pos) && !preSelected) selected = null;
@@ -185,14 +188,24 @@ export function mouseReleased(p: p5) {
 		selected = null;
 	}
 	holding = null;
-	updatePossibleMoves(game);
+	updatePossibleMoves();
 }
 
-function updatePossibleMoves(game: Game) {
+function updatePossibleMoves() {
 	if (selected === null) possibleMoves = [];
-	else possibleMoves = game.getMoves(selected);
+	else {
+		getMovesAsync(selected).then(moves => {
+			possibleMoves = moves as Move[];
+		});
+	}
 }
 
 function movesEqual(a: Move, b: Move) {
 	return a.src.equals(b.src) && a.dst.equals(b.dst);
+}
+
+export async function getMovesAsync(pos: Vec) {
+	return new Promise(resolve => {
+		resolve(game.getMoves(pos));
+	});
 }

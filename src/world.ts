@@ -10,6 +10,7 @@ let oldY = 0;
 let dragging = false;
 
 export function world(p: p5) {
+	p.push();
 	p.background(20);
 	let [cx, cy] = convertDimension(p.mouseX, p.mouseY);
 	if (dragging) {
@@ -42,19 +43,20 @@ export function world(p: p5) {
 		camera.y += dy * (cy / 1080);
 	};
 
-	p.mousePressed = () => {
+	p.mousePressed = (event: MouseEvent) => {
 		if (p.mouseButton === p.CENTER || p.mouseButton === p.RIGHT) {
 			dragging = true;
 		}
-		mousePressed(p);
+		mousePressed(p, event);
 	};
 
-	p.mouseReleased = () => {
+	p.mouseReleased = (event: MouseEvent) => {
 		if (p.mouseButton === p.CENTER || p.mouseButton === p.RIGHT) {
 			dragging = false;
 		}
-		mouseReleased(p);
+		mouseReleased(p, event);
 	};
+	p.pop();
 }
 
 export function screen2world(x: number, y: number): [number, number] {
