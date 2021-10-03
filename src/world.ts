@@ -43,19 +43,31 @@ export function world(p: p5) {
 		camera.y += dy * (cy / 1080);
 	};
 
-	p.mousePressed = (event: MouseEvent) => {
+	p.touchStarted = (event: MouseEvent) => {
 		if (p.mouseButton === p.CENTER || p.mouseButton === p.RIGHT) {
 			dragging = true;
 		}
 		mousePressed(p, event);
+		return false;
 	};
 
-	p.mouseReleased = (event: MouseEvent) => {
+	p.touchEnded = (event: MouseEvent) => {
 		if (p.mouseButton === p.CENTER || p.mouseButton === p.RIGHT) {
 			dragging = false;
 		}
 		mouseReleased(p, event);
+		return false;
 	};
+
+	p.keyPressed = () => {
+		if (p.keyCode === p.LEFT_ARROW) {
+			camera.r += Math.PI / 6;
+		}
+		if (p.keyCode === p.RIGHT_ARROW) {
+			camera.r -= Math.PI / 6;
+		}
+	};
+
 	p.pop();
 }
 

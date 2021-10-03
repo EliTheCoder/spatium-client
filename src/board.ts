@@ -111,13 +111,25 @@ export function board(p: p5, camera: Camera) {
 			pieceImage = images[(piece.team ? "b" : "w") + "0"];
 		} else pieceImage = images[pieceName];
 
-		p.image(
-			pieceImage,
-			heldPiecePos.x,
-			heldPiecePos.y,
-			squareSize,
-			squareSize
-		);
+		p.push();
+		p.rotate(-camera.r);
+		const [bx, by] = [heldPiecePos.x, heldPiecePos.y];
+		let dist = Math.sqrt(bx * bx + by * by);
+		let angle = Math.atan2(by, bx);
+		const [cx, cy] = [
+			Math.cos(angle + camera.r) * dist,
+			Math.sin(angle + camera.r) * dist
+		];
+
+		// Don't ask me why this works, but it centers the piece on the tile
+		const [dx, dy] = [
+			((Math.sqrt(2) / 2) * Math.cos(camera.r + Math.PI / 4) - 0.5) *
+				squareSize,
+			((Math.sqrt(2) / 2) * Math.sin(camera.r + Math.PI / 4) - 0.5) *
+				squareSize
+		];
+		p.image(pieceImage, cx + dx, cy + dy, squareSize, squareSize);
+		p.pop();
 	}
 }
 
