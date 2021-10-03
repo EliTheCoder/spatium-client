@@ -15,6 +15,7 @@ let preSelected: boolean = false;
 let holding: null | Vec = null;
 let possibleMoves: Move[] = [];
 let lastMove: Move | null = null;
+let possibleMovesCache = new Map<number, Move[]>();
 
 // Loading images for the pieces
 let images: { [key: string]: p5.Image } = {};
@@ -206,18 +207,25 @@ export function mouseReleased(p: p5, event: MouseEvent) {
 function updatePossibleMoves() {
 	if (selected === null) possibleMoves = [];
 	else {
-		getMovesAsync(selected).then(moves => {
-			possibleMoves = moves as Move[];
-		});
+		let { x, y, z } = game.getSize();
+		if (possibleMovesCache.has(getVecIndex(selected, x, y, z))) {
+			possibleMoves = possibleMovesCache.get(
+				getVecIndex(selected, x, y, z)
+			);
+		} else {
+			possibleMoves = game.getMoves(selected);
+			possibleMovesCache.set(
+				getVecIndex(selected, x, y, z),
+				possibleMoves
+			);
+		}
 	}
+}
+
+function getVecIndex(vec: Vec, i: number, j: number, k: number) {
+	return vec.x + vec.y * i + vec.z * i * j + vec.w * i * j * k;
 }
 
 function movesEqual(a: Move, b: Move) {
 	return a.src.equals(b.src) && a.dst.equals(b.dst);
-}
-
-export async function getMovesAsync(pos: Vec) {
-	return new Promise(resolve => {
-		resolve(game.getMoves(pos));
-	});
 }
