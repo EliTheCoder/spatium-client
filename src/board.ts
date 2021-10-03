@@ -142,7 +142,11 @@ export function mousePressed(p: p5, camera: Camera) {
 	let [mx, my] = convertDimension(p.mouseX, p.mouseY);
 	let [cx, cy] = [mx / camera.z + camera.x, my / camera.z + camera.y];
 	let pos = pix2board(new Vec(cx, cy));
-	if (game.isInBounds(pos) && game.getPiece(pos) !== null) {
+	if (
+		game.isInBounds(pos) && game.getPiece(pos) !== null && selected
+			? game.getPiece(pos).team === game.getPiece(selected).team
+			: true
+	) {
 		holding = pos;
 		preSelected = true;
 		if (selected && selected.equals(pos)) preSelected = false;
