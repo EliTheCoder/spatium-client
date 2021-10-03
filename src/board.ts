@@ -15,6 +15,7 @@ let selected: null | Vec = null;
 let preSelected: boolean = false;
 let holding: null | Vec = null;
 let possibleMoves: Move[] = [];
+let lastMove: Move | null = null;
 
 // Loading images for the pieces
 let images: { [key: string]: p5.Image } = {};
@@ -75,7 +76,8 @@ export function board(p: p5, camera: Camera) {
 						selected,
 						holding,
 						squareSize,
-						images
+						images,
+						lastMove
 					);
 				}
 			}
@@ -160,6 +162,7 @@ export function mousePressed(p: p5, camera: Camera) {
 		if (!selected || !selected.equals(pos)) selected = pos;
 	} else if (game.getMoves(selected).some(move => move.dst.equals(pos))) {
 		game.move({ src: selected, dst: pos });
+		lastMove = { src: selected, dst: pos };
 		selected = null;
 	} else {
 		selected = null;
@@ -180,6 +183,7 @@ export function mouseReleased(p: p5, camera: Camera) {
 	if (selected && selected.equals(pos) && !preSelected) selected = null;
 	if (holding && game.getMoves(holding).some(move => move.dst.equals(pos))) {
 		game.move({ src: holding, dst: pos });
+		lastMove = { src: holding, dst: pos };
 		holding = null;
 		selected = null;
 	}

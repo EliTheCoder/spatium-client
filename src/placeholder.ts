@@ -38,8 +38,11 @@ function drawImages(p: p5, squareSize: number) {
 	let tris = p.createGraphics(squareSize, squareSize);
 	dot.noStroke();
 	tris.noStroke();
-	dot.fill(0, 0, 0, 64);
-	tris.fill(0, 0, 0, 64);
+	// p.fill(160, 255, 255, 64);
+	dot.colorMode(p.HSB, 255);
+	tris.colorMode(p.HSB, 255);
+	dot.fill(160, 128, 255, 192);
+	tris.fill(160, 128, 255, 192);
 	dot.ellipse(squareSize / 2, squareSize / 2, squareSize / 4);
 	tris.triangle(0, 0, squareSize / 4, 0, 0, squareSize / 4);
 	tris.triangle(

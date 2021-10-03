@@ -1,4 +1,4 @@
-import { Game, Vec } from "hika";
+import { Game, Move, Vec } from "hika";
 import p5 from "p5";
 import { board2pix, tileColor } from "./board";
 
@@ -9,7 +9,8 @@ export function tile(
 	selected: Vec | null,
 	holding: Vec | null,
 	squareSize: number,
-	images: { [key: string]: p5.Image }
+	images: { [key: string]: p5.Image },
+	lastMove: Move | null
 ) {
 	// Getting world pixel coordinates of the tile
 	let cPos = board2pix(pos);
@@ -17,6 +18,16 @@ export function tile(
 	// Drawing the tile
 	p.fill(0, 0, tileColor(pos));
 	p.rect(cPos.x, cPos.y, squareSize, squareSize);
+
+	// Drawing last move indicator
+	if (lastMove !== null && pos.equals(lastMove.src)) {
+		p.fill(45, 192, 255, 64);
+		p.rect(cPos.x, cPos.y, squareSize, squareSize);
+	}
+	if (lastMove !== null && pos.equals(lastMove.dst)) {
+		p.fill(45, 192, 192, 64);
+		p.rect(cPos.x, cPos.y, squareSize, squareSize);
+	}
 
 	// Getting the piece at the position
 	let piece = game.getPiece(pos);
@@ -32,7 +43,7 @@ export function tile(
 	} else pieceImage = images[pieceName];
 
 	// Setting fill color for selected piece
-	p.fill(160, 255, 255, 64);
+	p.fill(160, 192, 255, 64);
 
 	// Drawing selection overlay before the piece if not holding
 	if (selected && pos.equals(selected) && holding === null) {
