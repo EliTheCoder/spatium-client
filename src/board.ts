@@ -178,9 +178,9 @@ export function mousePressed(p: p5, event: MouseEvent) {
 		selected !== null &&
 		game.getMoves(selected).some(move => move.dst.equals(pos))
 	) {
-		game.move({ src: selected, dst: pos });
+		game.move(new Move(selected, pos));
 		possibleMovesCache = new Map<number, Move[]>();
-		lastMove = { src: selected, dst: pos };
+		lastMove = new Move(selected, pos);
 		selected = null;
 	} else {
 		selected = null;
@@ -202,9 +202,9 @@ export function mouseReleased(p: p5, event: MouseEvent) {
 		selected = null;
 	}
 	if (holding && game.getMoves(holding).some(move => move.dst.equals(pos))) {
-		game.move({ src: holding, dst: pos });
+		game.move(new Move(holding, pos));
 		possibleMovesCache = new Map<number, Move[]>();
-		lastMove = { src: holding, dst: pos };
+		lastMove = new Move(holding, pos);
 		holding = null;
 		selected = null;
 	}
