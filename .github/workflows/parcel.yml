@@ -26,3 +26,9 @@ jobs:
       run: |
         yarn
         parcel build src/index.html --public-url ./ --out-dir dist --no-minify
+        
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with: 
+        name: spatium
+        path: dist
