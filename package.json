@@ -7,13 +7,12 @@
 		"build": "parcel build src/index.html"
 	},
 	"dependencies": {
-		"hika": "^1.0.2",
+		"hika": "^1.1.2",
 		"p5": "^1.4.0",
 		"parcel": "^2.0.0-rc.0",
 		"typescript": "^4.1.3"
 	},
 	"devDependencies": {
-		"@parcel/fs": "^2.0.0-alpha.3",
 		"@parcel/transformer-image": "2.0.0-rc.0",
 		"@types/node": "^14.14.20",
 		"@types/p5": "^1.3.1"
