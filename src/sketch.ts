@@ -1,10 +1,12 @@
 import p5 from "p5";
 import { loadImages } from "./board";
 import { overlay } from "./overlay";
-import { world } from "./world";
+import World from "./world";
 
 let width = 1920;
 let height = 1080;
+
+let world: World | null = null;
 
 export function sketch(p: p5) {
 	function canvasSize(w: number, h: number) {
@@ -39,11 +41,12 @@ export function sketch(p: p5) {
 		p.rectMode(p.CORNER);
 		p.ellipseMode(p.CENTER);
 		p.smooth();
+		world = new World(p);
 	};
 
 	p.draw = () => {
 		p.scale(p.width / 1920, p.height / 1080);
-		world(p);
+		world.draw();
 		overlay(p);
 	};
 }

@@ -15,7 +15,7 @@ export function tile(
 	camera: Camera
 ) {
 	// Getting world pixel coordinates of the tile
-	let cPos = board2pix(pos);
+	let cPos = board2pix(pos, game.getSize());
 
 	// Drawing the tile
 	p.fill(0, 0, tileColor(pos));

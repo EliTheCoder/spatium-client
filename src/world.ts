@@ -1,77 +1,101 @@
 import { convertDimension } from "./sketch";
-import { board, mousePressed, mouseReleased } from "./board";
 import p5 from "p5";
+import Board from "./board";
 
 export type Camera = { x: number; y: number; z: number; r: number };
 
-let camera: Camera = { x: 0, y: 0, z: 1, r: 0 };
-let oldX = 0;
-let oldY = 0;
-let dragging = false;
-
-export function world(p: p5) {
-	p.push();
-	p.background(20);
-	let [cx, cy] = convertDimension(p.mouseX, p.mouseY);
-	if (dragging) {
-		camera.x += (oldX - cx) / camera.z;
-		camera.y += (oldY - cy) / camera.z;
+export default class World extends EventTarget {
+	private p: p5;
+	private camera: Camera = { x: 0, y: 0, z: 1, r: 0 };
+	private oldX = 0;
+	private oldY = 0;
+	private dragging = false;
+	private boards: Board[] = [];
+	constructor(p: p5) {
+		super();
+		this.p = p;
+		this.boards.push(new Board(p));
 	}
-	oldX = cx;
-	oldY = cy;
-	p.scale(camera.z);
-	p.translate(-camera.x, -camera.y);
-	p.rotate(camera.r);
-	board(p, camera);
+	draw() {
+		this.p.push();
+		this.p.background(20);
+		let [cx, cy] = convertDimension(this.p.mouseX, this.p.mouseY);
+		if (this.dragging) {
+			this.camera.x += (this.oldX - cx) / this.camera.z;
+			this.camera.y += (this.oldY - cy) / this.camera.z;
+		}
+		this.oldX = cx;
+		this.oldY = cy;
+		this.p.scale(this.camera.z);
+		this.p.translate(-this.camera.x, -this.camera.y);
+		this.p.rotate(this.camera.r);
+		for (let board of this.boards) {
+			board.draw(this.camera);
+		}
 
-	p.mouseWheel = (event: WheelEvent) => {
-		const dz = event.deltaY / -500;
-		const oldZ = camera.z;
-		camera.z *= 1 + dz;
-		if (camera.z <= 0.1) {
-			camera.z = oldZ;
-			return;
-		}
-		if (camera.z >= 8) {
-			camera.z = oldZ;
-			return;
-		}
-		const dx = (1 / oldZ - 1 / camera.z) * 1920;
-		const dy = (1 / oldZ - 1 / camera.z) * 1080;
-		const [cx, cy] = convertDimension(p.mouseX, p.mouseY);
-		camera.x += dx * (cx / 1920);
-		camera.y += dy * (cy / 1080);
-	};
+		this.p.mouseWheel = (event: WheelEvent) => {
+			const dz = event.deltaY / -500;
+			const oldZ = this.camera.z;
+			this.camera.z *= 1 + dz;
+			if (this.camera.z <= 0.1) {
+				this.camera.z = oldZ;
+				return;
+			}
+			if (this.camera.z >= 8) {
+				this.camera.z = oldZ;
+				return;
+			}
+			const dx = (1 / oldZ - 1 / this.camera.z) * 1920;
+			const dy = (1 / oldZ - 1 / this.camera.z) * 1080;
+			const [cx, cy] = convertDimension(this.p.mouseX, this.p.mouseY);
+			this.camera.x += dx * (cx / 1920);
+			this.camera.y += dy * (cy / 1080);
+		};
 
-	p.touchStarted = (event: MouseEvent) => {
-		if (p.mouseButton === p.CENTER || p.mouseButton === p.RIGHT) {
-			dragging = true;
-		}
-		mousePressed(p, event);
-		return false;
-	};
+		this.p.touchStarted = (event: MouseEvent) => {
+			if (
+				this.p.mouseButton === this.p.CENTER ||
+				this.p.mouseButton === this.p.RIGHT
+			) {
+				this.dragging = true;
+			}
+			for (let board of this.boards) {
+				board.mousePressed(this.p, event, this.camera);
+			}
+			return false;
+		};
 
-	p.touchEnded = (event: MouseEvent) => {
-		if (p.mouseButton === p.CENTER || p.mouseButton === p.RIGHT) {
-			dragging = false;
-		}
-		mouseReleased(p, event);
-		return false;
-	};
+		this.p.touchEnded = (event: MouseEvent) => {
+			if (
+				this.p.mouseButton === this.p.CENTER ||
+				this.p.mouseButton === this.p.RIGHT
+			) {
+				this.dragging = false;
+			}
+			for (let board of this.boards) {
+				board.mouseReleased(this.p, event, this.camera);
+			}
+			return false;
+		};
 
-	p.keyPressed = () => {
-		if (p.keyCode === p.LEFT_ARROW) {
-			camera.r += Math.PI / 6;
-		}
-		if (p.keyCode === p.RIGHT_ARROW) {
-			camera.r -= Math.PI / 6;
-		}
-	};
+		this.p.keyPressed = () => {
+			if (this.p.keyCode === this.p.LEFT_ARROW) {
+				this.camera.r += Math.PI / 6;
+			}
+			if (this.p.keyCode === this.p.RIGHT_ARROW) {
+				this.camera.r -= Math.PI / 6;
+			}
+		};
 
-	p.pop();
+		this.p.pop();
+	}
 }
 
-export function screen2world(x: number, y: number): [number, number] {
+export function screen2world(
+	x: number,
+	y: number,
+	camera: Camera
+): [number, number] {
 	const [ax, ay] = convertDimension(x, y);
 	const [bx, by] = [ax / camera.z + camera.x, ay / camera.z + camera.y];
 	let dist = Math.sqrt(bx * bx + by * by);

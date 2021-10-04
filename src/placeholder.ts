@@ -16,7 +16,7 @@ export function drawPlaceholders(
 }
 
 function placeholder(p: p5, game: Game, move: Move, squareSize: number) {
-	let { x, y } = board2pix(move.dst);
+	let { x, y } = board2pix(move.dst, game.getSize());
 	p.fill(160, 192, 128, 192);
 	p.stroke(0, 0, 255, 192);
 	if (game.getPiece(move.dst) === null) {
