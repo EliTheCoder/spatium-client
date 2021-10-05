@@ -7,17 +7,25 @@ import { Move } from "hika";
 export default class GameBoard extends EventEmitter {
 	board: Board;
 	socket: GameSocket;
-	status: number = 0;
+	status: Status = 0;
 	constructor(p: p5, url: string) {
 		super();
-		this.socket = new GameSocket(url);
+		let wsUrl = new URL(url);
+		console.log(wsUrl);
+		if (wsUrl.port === "") wsUrl.port = "9024";
+		this.socket = new GameSocket(wsUrl.toString());
 		this.board;
-		this.socket.on("initialize", initialState => {
-			this.board = new Board(p, initialState);
+		this.socket.on("initialize", data => {
+			this.board = new Board(p, data.initialState);
+			if (data.moves.length > 0) {
+				for (let i of data.moves) {
+					this.board.move(Move.deserialize(i));
+				}
+			}
 			this.board.on("move", (move: Move) => {
 				this.socket.move(move);
 			});
-			this.status = 1;
+			this.status = Status.PLAYING;
 		});
 		this.socket.on("move", (data: { move: string; team: number }) => {
 			this.board.move(Move.deserialize(data.move));
@@ -26,4 +34,10 @@ export default class GameBoard extends EventEmitter {
 	isInitialized() {
 		return this.status === 1;
 	}
+}
+
+enum Status {
+	WAITING = 0,
+	PLAYING = 1,
+	FINISHED = 2
 }

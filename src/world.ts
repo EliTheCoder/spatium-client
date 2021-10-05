@@ -17,7 +17,13 @@ export default class World extends EventEmitter {
 	constructor(p: p5) {
 		super();
 		this.p = p;
-		this.boards.push(new GameBoard(this.p, "ws://alexcheese.com:9024"));
+		let wsUrl = new URL(window.location.href).searchParams.get("url");
+		this.boards.push(
+			new GameBoard(
+				this.p,
+				wsUrl != null ? wsUrl : "wss://spatiumchess.app"
+			)
+		);
 	}
 	draw() {
 		this.p.push();

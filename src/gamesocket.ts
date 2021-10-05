@@ -32,9 +32,13 @@ export default class GameSocket extends EventEmitter {
 		});
 		this.on("open", () => this.open());
 		this.on(ResponseType.HANDSHAKE, data => {
-			this.emit("initialize", data.data.initialState);
+			this.emit("initialize", data.data);
 		});
-		console.log("%c↻ Connecting to server", "font-weight: bold");
+		console.log(
+			`%c↻ Connecting to server%c ${url}`,
+			"font-weight: bold",
+			"font-weight: inherit"
+		);
 	}
 	send(opcode: MessageType, data?: any) {
 		if (opcode !== MessageType.HEARTBEAT) {
