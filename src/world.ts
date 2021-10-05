@@ -3,10 +3,11 @@ import p5 from "p5";
 import Board from "./board";
 import GameSocket from "./gamesocket";
 import GameBoard from "./gameboard";
+import EventEmitter from "eventemitter3";
 
 export type Camera = { x: number; y: number; z: number; r: number };
 
-export default class World extends EventTarget {
+export default class World extends EventEmitter {
 	private p: p5;
 	private camera: Camera = { x: 0, y: 0, z: 1, r: 0 };
 	private oldX = 0;
