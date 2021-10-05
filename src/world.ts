@@ -4,6 +4,7 @@ import Board from "./board";
 import GameSocket from "./gamesocket";
 import GameBoard from "./gameboard";
 import EventEmitter from "eventemitter3";
+import { Vec } from "hika";
 
 export type Camera = { x: number; y: number; z: number; r: number };
 
@@ -21,7 +22,8 @@ export default class World extends EventEmitter {
 		this.boards.push(
 			new GameBoard(
 				this.p,
-				wsUrl != null ? wsUrl : "wss://spatiumchess.app"
+				wsUrl != null ? wsUrl : "wss://spatiumchess.app",
+				new Vec(50, 50)
 			)
 		);
 	}
@@ -102,11 +104,7 @@ export default class World extends EventEmitter {
 	}
 }
 
-export function screen2world(
-	x: number,
-	y: number,
-	camera: Camera
-): [number, number] {
+export function screen2world(x: number, y: number, camera: Camera): Vec {
 	const [ax, ay] = convertDimension(x, y);
 	const [bx, by] = [ax / camera.z + camera.x, ay / camera.z + camera.y];
 	let dist = Math.sqrt(bx * bx + by * by);
@@ -115,5 +113,5 @@ export function screen2world(
 		Math.cos(angle - camera.r) * dist,
 		Math.sin(angle - camera.r) * dist
 	];
-	return [cx, cy];
+	return new Vec(cx, cy);
 }

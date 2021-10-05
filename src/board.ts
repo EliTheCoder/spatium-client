@@ -74,6 +74,7 @@ function movesEqual(a: Move, b: Move) {
 
 export default class Board extends EventEmitter {
 	private game: Game;
+	private originPoint: Vec;
 	private selected: null | Vec = null;
 	private oldSelected: null | Vec = null;
 	private preSelected: boolean = false;
@@ -82,7 +83,7 @@ export default class Board extends EventEmitter {
 	private lastMove: Move | null = null;
 	private possibleMovesCache = new Map<number, Move[]>();
 	private p: p5;
-	constructor(p: p5, initialState?: string) {
+	constructor(p: p5, originPoint: Vec = new Vec(), initialState?: string) {
 		super();
 		if (initialState == null) {
 			this.game = new Game();
@@ -90,6 +91,7 @@ export default class Board extends EventEmitter {
 			this.game = new Game(initialState);
 		}
 		this.p = p;
+		this.originPoint = originPoint;
 	}
 	move(move: Move) {
 		this.game.move(move);
@@ -140,7 +142,8 @@ export default class Board extends EventEmitter {
 							squareSize,
 							images,
 							this.lastMove,
-							camera
+							camera,
+							this.originPoint
 						);
 					}
 				}
@@ -148,7 +151,8 @@ export default class Board extends EventEmitter {
 		}
 
 		// Get world coordinates of the mouse
-		const [cx, cy] = screen2world(this.p.mouseX, this.p.mouseY, camera);
+		let worldVec = screen2world(this.p.mouseX, this.p.mouseY, camera);
+		const [cx, cy] = [worldVec.x, worldVec.y];
 
 		// Drawing highlight under the mouse
 		this.p.noStroke();
@@ -162,7 +166,13 @@ export default class Board extends EventEmitter {
 		);
 
 		// Drawing dots for each possible move
-		drawPlaceholders(this.p, this.game, this.possibleMoves, squareSize);
+		drawPlaceholders(
+			this.p,
+			this.game,
+			this.possibleMoves,
+			squareSize,
+			this.originPoint
+		);
 
 		// Drawing the currently held piece under mouse
 		let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
@@ -200,8 +210,10 @@ export default class Board extends EventEmitter {
 	}
 	mousePressed(p: p5, event: MouseEvent, camera: Camera) {
 		if (event.button !== 0) return;
-		const [cx, cy] = screen2world(p.mouseX, p.mouseY, camera);
-		let pos = pix2board(new Vec(cx, cy), this.game.getSize());
+		const worldVec = screen2world(p.mouseX, p.mouseY, camera).add(
+			this.originPoint.scale(-1)
+		);
+		let pos = pix2board(worldVec, this.game.getSize());
 		if (!this.game.isInBounds(pos)) {
 			this.selected = null;
 			this.holding = null;
@@ -237,8 +249,10 @@ export default class Board extends EventEmitter {
 	}
 	mouseReleased(p: p5, event: MouseEvent, camera: Camera) {
 		if (event.button !== 0) return;
-		const [cx, cy] = screen2world(p.mouseX, p.mouseY, camera);
-		let pos = pix2board(new Vec(cx, cy), this.game.getSize());
+		const worldVec = screen2world(p.mouseX, p.mouseY, camera).add(
+			this.originPoint.scale(-1)
+		);
+		let pos = pix2board(worldVec, this.game.getSize());
 		if (!this.game.isInBounds(pos)) {
 			this.holding = null;
 			this.selected = null;

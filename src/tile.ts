@@ -12,14 +12,31 @@ export function tile(
 	squareSize: number,
 	images: { [key: string]: p5.Image },
 	lastMove: Move | null,
-	camera: Camera
+	camera: Camera,
+	originPoint: Vec
 ) {
 	// Getting world pixel coordinates of the tile
-	let cPos = board2pix(pos, game.getSize());
+	let cPos = board2pix(pos, game.getSize()).add(originPoint);
+	let size = game.getSize();
 
 	// Drawing the tile
 	p.fill(0, 0, tileColor(pos));
-	p.rect(cPos.x, cPos.y, squareSize, squareSize);
+	const cornerVal = 8;
+	let corners: [number, number, number, number] = [0, 0, 0, 0];
+	if (pos.x === 0 && pos.y === 0) corners[3] = cornerVal;
+	if (pos.x === size.x - 1 && pos.y === 0) corners[2] = cornerVal;
+	if (pos.x === size.x - 1 && pos.y === size.y - 1) corners[1] = cornerVal;
+	if (pos.x === 0 && pos.y === size.y - 1) corners[0] = cornerVal;
+	p.rect(
+		cPos.x,
+		cPos.y,
+		squareSize,
+		squareSize,
+		corners[0],
+		corners[1],
+		corners[2],
+		corners[3]
+	);
 
 	// Drawing last move indicator
 	if (lastMove !== null && pos.equals(lastMove.src)) {
