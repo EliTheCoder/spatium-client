@@ -7,21 +7,23 @@ import { Move } from "hika";
 export default class GameBoard extends EventEmitter {
 	board: Board;
 	socket: GameSocket;
+	status: number = 0;
 	constructor(p: p5, url: string) {
 		super();
 		this.socket = new GameSocket(url);
-		this.board = new Board(p);
+		this.board;
 		this.socket.on("initialize", initialState => {
 			this.board = new Board(p, initialState);
 			this.board.on("move", (move: Move) => {
 				this.socket.move(move);
 			});
+			this.status = 1;
 		});
-		this.board.on("move", (move: Move) => {
-			this.socket.move(move);
+		this.socket.on("move", (data: { move: string; team: number }) => {
+			this.board.move(Move.deserialize(data.move));
 		});
-		this.socket.on("move", (move: string) => {
-			this.board.move(Move.deserialize(move));
-		});
+	}
+	isInitialized() {
+		return this.status === 1;
 	}
 }

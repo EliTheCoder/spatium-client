@@ -32,7 +32,7 @@ export default class World extends EventTarget {
 		this.p.translate(-this.camera.x, -this.camera.y);
 		this.p.rotate(this.camera.r);
 		for (let gameBoard of this.boards) {
-			gameBoard.board.draw(this.camera);
+			if (gameBoard.isInitialized()) gameBoard.board.draw(this.camera);
 		}
 
 		this.p.mouseWheel = (event: WheelEvent) => {
@@ -62,7 +62,8 @@ export default class World extends EventTarget {
 				this.dragging = true;
 			}
 			for (let gameBoard of this.boards) {
-				gameBoard.board.mousePressed(this.p, event, this.camera);
+				if (gameBoard.isInitialized())
+					gameBoard.board.mousePressed(this.p, event, this.camera);
 			}
 			return false;
 		};
@@ -75,7 +76,8 @@ export default class World extends EventTarget {
 				this.dragging = false;
 			}
 			for (let gameBoard of this.boards) {
-				gameBoard.board.mouseReleased(this.p, event, this.camera);
+				if (gameBoard.isInitialized())
+					gameBoard.board.mouseReleased(this.p, event, this.camera);
 			}
 			return false;
 		};
