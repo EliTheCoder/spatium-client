@@ -2,10 +2,9 @@ import { convertDimension } from "./sketch";
 import p5 from "p5";
 import Board from "./board";
 import GameSocket from "./gamesocket";
+import GameBoard from "./gameboard";
 
 export type Camera = { x: number; y: number; z: number; r: number };
-
-type GameBoard = { socket: GameSocket; board: Board };
 
 export default class World extends EventTarget {
 	private p: p5;
@@ -17,10 +16,7 @@ export default class World extends EventTarget {
 	constructor(p: p5) {
 		super();
 		this.p = p;
-		this.boards.push({
-			board: new Board(p),
-			socket: new GameSocket("ws://alexcheese.com:9024")
-		});
+		this.boards.push(new GameBoard(this.p, "ws://alexcheese.com:9024"));
 	}
 	draw() {
 		this.p.push();

@@ -2108,7 +2108,7 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-eventemitter3@^4.0.0:
+eventemitter3@^4.0.0, eventemitter3@^4.0.7:
   version "4.0.7"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
@@ -2577,10 +2577,10 @@ highlight.js@~10.4.0:
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.4.1.tgz#d48fbcf4a9971c4361b3f95f302747afe19dbad0"
   integrity sha512-yR5lWvNz7c85OhVAEAeFhVCc/GV4C30Fjzc/rCP0aCWzc1UUOPUk55dK/qdwTZHBvMZo+eZ2jpk62ndX/xMFlg==
 
-hika@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/hika/-/hika-1.1.2.tgz#9ee1f4e2cf384dbf16a955b0e3ed38081ec4b396"
-  integrity sha512-BIimNyIcP7+t2hE+6b7909XcL2CClUnP+WsxvWRBtq4j53E2NpuTODa0U721sGCUl2ZGwNbtYLNRT8cWHBcNUw==
+hika@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/hika/-/hika-1.1.3.tgz#9a8d73255b487fc37ee11253ca804ce7fd6b5c08"
+  integrity sha512-ey7JWJPmfYg5XSUALc/MLWmqnWh5H5lsb+qopvpMNrp3lg94HeSuydwVR6PkcUk770E+Zy1E7EBOdqoGRAiEZA==
 
 hmac-drbg@^1.0.1:
   version "1.0.1"

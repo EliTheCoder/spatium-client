@@ -10,13 +10,28 @@ export default class GameSocket extends EventEmitter {
 			this.emit("open");
 		});
 		this.socket.addEventListener("message", event => {
-			if (Opcode[event.data.o] !== null) {
-				this.emit(Opcode[event.data.o], event.data.d);
+			const data = JSON.parse(event.data);
+
+			if (opcodes[data.o] !== null) {
+				this.emit(opcodes[data.o], data.d);
+			} else {
+				console.error("Unknown opcode", data.o);
 			}
 		});
 		this.on("open", () => this.open());
+		this.on(ResponseType.HANDSHAKE, data => {
+			this.emit("initialize", data.initialState);
+		});
+		console.log("%c↻ Connecting to server", "font-weight: bold");
 	}
 	send(opcode: MessageType, data?: any) {
+		console.log(
+			`%c→ Sending %c${opcode}%c \n%c  ${data}`,
+			"font-weight: bold",
+			"background-color:#444",
+			"background-color:inherit",
+			"color:gray"
+		);
 		if (data === undefined) {
 			this.socket.send(JSON.stringify({ o: opcode }));
 		} else {
@@ -24,7 +39,7 @@ export default class GameSocket extends EventEmitter {
 		}
 	}
 	move(move: Move) {
-		this.send(MessageType.MOVE, move);
+		this.send(MessageType.MOVE, Move.serialize(move));
 	}
 	chat(data: { data: { message: string } }) {
 		this.send(MessageType.CHAT, data);
@@ -66,9 +81,15 @@ export default class GameSocket extends EventEmitter {
 			version: "0.0.1"
 		});
 		setInterval(() => this.heartbeat(), 1000);
+		console.log(
+			"%c✓ %cConnected to server",
+			"font-weight: bold; color: green",
+			"color: inherit"
+		);
 	}
 	private heartbeat() {
 		this.send(MessageType.HEARTBEAT);
+		console.log("%c❤ %cSent heartbeat", "color: red", "color: gray");
 	}
 }
 
@@ -103,7 +124,7 @@ enum MessageType {
 	CHAT = "7.a"
 }
 
-const Opcode = {
+const opcodes = {
 	"0.b": ResponseType.HEARTBEAT,
 	"1.b": ResponseType.HANDSHAKE,
 	"2.b": ResponseType.PING,

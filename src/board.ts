@@ -3,6 +3,7 @@ import { Game, Move, Vec } from "hika";
 import { Camera, screen2world } from "./world";
 import { drawPlaceholders } from "./placeholder";
 import { tile } from "./tile";
+import EventEmitter from "eventemitter3";
 
 const squareSize = 50;
 
@@ -71,7 +72,7 @@ function movesEqual(a: Move, b: Move) {
 	return a.src.equals(b.src) && a.dst.equals(b.dst);
 }
 
-export default class Board extends EventTarget {
+export default class Board extends EventEmitter {
 	private game: Game;
 	private selected: null | Vec = null;
 	private oldSelected: null | Vec = null;
@@ -92,7 +93,7 @@ export default class Board extends EventTarget {
 	}
 	move(move: Move) {
 		this.game.move(move);
-		this.dispatchEvent(new Event(BoardEvent.MOVE));
+		this.emit(BoardEvent.MOVE, move);
 	}
 	updatePossibleMoves() {
 		if (this.selected === null) this.possibleMoves = [];
@@ -251,7 +252,7 @@ export default class Board extends EventTarget {
 			this.holding &&
 			this.game.getMoves(this.holding).some(move => move.dst.equals(pos))
 		) {
-			this.game.move(new Move(this.holding, pos));
+			this.move(new Move(this.holding, pos));
 			this.possibleMovesCache = new Map<number, Move[]>();
 			this.lastMove = new Move(this.holding, pos);
 			this.holding = null;
@@ -262,6 +263,6 @@ export default class Board extends EventTarget {
 	}
 }
 
-enum BoardEvent {
+export enum BoardEvent {
 	MOVE = "move"
 }
