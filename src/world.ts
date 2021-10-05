@@ -1,8 +1,11 @@
 import { convertDimension } from "./sketch";
 import p5 from "p5";
 import Board from "./board";
+import GameSocket from "./gamesocket";
 
 export type Camera = { x: number; y: number; z: number; r: number };
+
+type GameBoard = { socket: GameSocket; board: Board };
 
 export default class World extends EventTarget {
 	private p: p5;
@@ -10,11 +13,14 @@ export default class World extends EventTarget {
 	private oldX = 0;
 	private oldY = 0;
 	private dragging = false;
-	private boards: Board[] = [];
+	private boards: GameBoard[] = [];
 	constructor(p: p5) {
 		super();
 		this.p = p;
-		this.boards.push(new Board(p));
+		this.boards.push({
+			board: new Board(p),
+			socket: new GameSocket("ws://alexcheese.com:9024")
+		});
 	}
 	draw() {
 		this.p.push();
@@ -29,8 +35,8 @@ export default class World extends EventTarget {
 		this.p.scale(this.camera.z);
 		this.p.translate(-this.camera.x, -this.camera.y);
 		this.p.rotate(this.camera.r);
-		for (let board of this.boards) {
-			board.draw(this.camera);
+		for (let gameBoard of this.boards) {
+			gameBoard.board.draw(this.camera);
 		}
 
 		this.p.mouseWheel = (event: WheelEvent) => {
@@ -59,8 +65,8 @@ export default class World extends EventTarget {
 			) {
 				this.dragging = true;
 			}
-			for (let board of this.boards) {
-				board.mousePressed(this.p, event, this.camera);
+			for (let gameBoard of this.boards) {
+				gameBoard.board.mousePressed(this.p, event, this.camera);
 			}
 			return false;
 		};
@@ -72,8 +78,8 @@ export default class World extends EventTarget {
 			) {
 				this.dragging = false;
 			}
-			for (let board of this.boards) {
-				board.mouseReleased(this.p, event, this.camera);
+			for (let gameBoard of this.boards) {
+				gameBoard.board.mouseReleased(this.p, event, this.camera);
 			}
 			return false;
 		};
