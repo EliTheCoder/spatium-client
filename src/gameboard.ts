@@ -13,6 +13,9 @@ export default class GameBoard extends EventEmitter {
 		this.board = new Board(p);
 		this.socket.on("initialize", initialState => {
 			this.board = new Board(p, initialState);
+			this.board.on("move", (move: Move) => {
+				this.socket.move(move);
+			});
 		});
 		this.board.on("move", (move: Move) => {
 			this.socket.move(move);

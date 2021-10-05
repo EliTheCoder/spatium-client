@@ -12,6 +12,18 @@ export default class GameSocket extends EventEmitter {
 		this.socket.addEventListener("message", event => {
 			const data = JSON.parse(event.data);
 
+			if (data.o !== "0.b") {
+				console.log(
+					`%c→ Received %c${data.o}%c \n%c  ${JSON.stringify(
+						data.d
+					)}`,
+					"font-weight: bold",
+					"background-color:#444",
+					"background-color:inherit",
+					"color:gray"
+				);
+			}
+
 			if (opcodes[data.o] !== null) {
 				this.emit(opcodes[data.o], data.d);
 			} else {
@@ -20,18 +32,20 @@ export default class GameSocket extends EventEmitter {
 		});
 		this.on("open", () => this.open());
 		this.on(ResponseType.HANDSHAKE, data => {
-			this.emit("initialize", data.initialState);
+			this.emit("initialize", data.data.initialState);
 		});
 		console.log("%c↻ Connecting to server", "font-weight: bold");
 	}
 	send(opcode: MessageType, data?: any) {
-		console.log(
-			`%c→ Sending %c${opcode}%c \n%c  ${data}`,
-			"font-weight: bold",
-			"background-color:#444",
-			"background-color:inherit",
-			"color:gray"
-		);
+		if (opcode !== MessageType.HEARTBEAT) {
+			console.log(
+				`%c← Sending %c${opcode}%c \n%c  ${JSON.stringify(data)}`,
+				"font-weight: bold",
+				"background-color:#444",
+				"background-color:inherit",
+				"color:gray"
+			);
+		}
 		if (data === undefined) {
 			this.socket.send(JSON.stringify({ o: opcode }));
 		} else {
@@ -83,7 +97,7 @@ export default class GameSocket extends EventEmitter {
 		setInterval(() => this.heartbeat(), 1000);
 		console.log(
 			"%c✓ %cConnected to server",
-			"font-weight: bold; color: green",
+			"font-weight: bold; color: LimeGreen",
 			"color: inherit"
 		);
 	}

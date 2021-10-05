@@ -84,7 +84,7 @@ export default class Board extends EventEmitter {
 	private p: p5;
 	constructor(p: p5, initialState?: string) {
 		super();
-		if (initialState === undefined) {
+		if (initialState == null) {
 			this.game = new Game();
 		} else {
 			this.game = new Game(initialState);
