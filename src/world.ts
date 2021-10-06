@@ -102,6 +102,12 @@ export default class World extends EventEmitter {
 
 		this.p.pop();
 	}
+	getCamera() {
+		return this.camera;
+	}
+	getBoards() {
+		return this.boards;
+	}
 }
 
 export function screen2world(x: number, y: number, camera: Camera): Vec {

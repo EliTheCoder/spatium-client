@@ -47,7 +47,7 @@ export function sketch(p: p5) {
 	p.draw = () => {
 		p.scale(p.width / 1920, p.height / 1080);
 		world.draw();
-		overlay(p);
+		overlay(p, world);
 	};
 }
 

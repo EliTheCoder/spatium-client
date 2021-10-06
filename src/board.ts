@@ -275,6 +275,12 @@ export default class Board extends EventEmitter {
 		this.holding = null;
 		this.updatePossibleMoves();
 	}
+	getGame(): Game {
+		return this.game;
+	}
+	getOriginPoint(): Vec {
+		return this.originPoint;
+	}
 }
 
 export enum BoardEvent {
