@@ -73,7 +73,7 @@ function movesEqual(a: Move, b: Move) {
 }
 
 export default class Board extends EventEmitter {
-	private game: Game;
+	game: Game;
 	private originPoint: Vec;
 	private selected: null | Vec = null;
 	private oldSelected: null | Vec = null;
@@ -95,6 +95,8 @@ export default class Board extends EventEmitter {
 	}
 	move(move: Move) {
 		this.game.move(move);
+		this.lastMove = move;
+		this.possibleMovesCache = new Map<number, Move[]>();
 		this.emit(BoardEvent.MOVE, move);
 	}
 	updatePossibleMoves() {
@@ -240,8 +242,6 @@ export default class Board extends EventEmitter {
 			this.game.getMoves(this.selected).some(move => move.dst.equals(pos))
 		) {
 			this.move(new Move(this.selected, pos));
-			this.possibleMovesCache = new Map<number, Move[]>();
-			this.lastMove = new Move(this.selected, pos);
 			this.selected = null;
 		} else {
 			this.selected = null;
@@ -267,8 +267,6 @@ export default class Board extends EventEmitter {
 			this.game.getMoves(this.holding).some(move => move.dst.equals(pos))
 		) {
 			this.move(new Move(this.holding, pos));
-			this.possibleMovesCache = new Map<number, Move[]>();
-			this.lastMove = new Move(this.holding, pos);
 			this.holding = null;
 			this.selected = null;
 		}
