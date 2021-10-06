@@ -1,6 +1,6 @@
 import { convertDimension } from "./sketch";
 import p5 from "p5";
-import Board from "./board";
+import Board, { board2pix } from "./board";
 import GameSocket from "./gamesocket";
 import GameBoard from "./gameboard";
 import EventEmitter from "eventemitter3";
@@ -19,13 +19,8 @@ export default class World extends EventEmitter {
 		super();
 		this.p = p;
 		let wsUrl = new URL(window.location.href).searchParams.get("url");
-		this.boards.push(
-			new GameBoard(
-				this.p,
-				wsUrl != null ? wsUrl : "wss://spatiumchess.app",
-				new Vec(50, 50)
-			)
-		);
+		let wsUrlString = wsUrl != null ? wsUrl : "wss://spatiumchess.app";
+		this.boards.push(new GameBoard(this.p, wsUrlString));
 	}
 	draw() {
 		this.p.push();

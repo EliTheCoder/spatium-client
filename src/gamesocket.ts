@@ -3,6 +3,7 @@ import { Move } from "hika";
 
 export default class GameSocket extends EventEmitter {
 	private socket: WebSocket;
+	private ping: number;
 	constructor(url: string) {
 		super();
 		this.socket = new WebSocket(url);
