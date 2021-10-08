@@ -14,6 +14,7 @@ export default class World extends EventEmitter {
 	private oldX = 0;
 	private oldY = 0;
 	private dragging = false;
+	private trackpad = false;
 	private boards: GameBoard[] = [];
 	constructor(p: p5) {
 		super();
@@ -42,7 +43,13 @@ export default class World extends EventEmitter {
 		this.p.mouseWheel = (event: WheelEvent) => {
 			const dz = event.deltaY / -500;
 			const oldZ = this.camera.z;
-			this.camera.z *= 1 + dz;
+			if (!this.trackpad || this.p.keyIsDown(this.p.CONTROL))
+				this.camera.z *= 1 + dz;
+			if (this.trackpad && !this.p.keyIsDown(this.p.CONTROL)) {
+				this.camera.x += (event.deltaX / this.camera.z) * 2;
+				this.camera.y += (event.deltaY / this.camera.z) * 2;
+				return;
+			}
 			if (this.camera.z <= 0.1) {
 				this.camera.z = oldZ;
 				return;
@@ -59,10 +66,7 @@ export default class World extends EventEmitter {
 		};
 
 		this.p.touchStarted = (event: MouseEvent) => {
-			if (
-				this.p.mouseButton === this.p.CENTER ||
-				this.p.mouseButton === this.p.RIGHT
-			) {
+			if (this.p.mouseButton === this.p.CENTER) {
 				this.dragging = true;
 			}
 			for (let gameBoard of this.boards) {
@@ -73,10 +77,7 @@ export default class World extends EventEmitter {
 		};
 
 		this.p.touchEnded = (event: MouseEvent) => {
-			if (
-				this.p.mouseButton === this.p.CENTER ||
-				this.p.mouseButton === this.p.RIGHT
-			) {
+			if (this.p.mouseButton === this.p.CENTER) {
 				this.dragging = false;
 			}
 			for (let gameBoard of this.boards) {
@@ -93,6 +94,9 @@ export default class World extends EventEmitter {
 			if (this.p.keyCode === this.p.RIGHT_ARROW) {
 				this.camera.r -= Math.PI / 6;
 			}
+			if (this.p.keyCode === this.p.ALT) {
+				this.toggleTrackpad();
+			}
 		};
 
 		this.p.pop();
@@ -102,6 +106,12 @@ export default class World extends EventEmitter {
 	}
 	getBoards() {
 		return this.boards;
+	}
+	toggleTrackpad() {
+		return (this.trackpad = !this.trackpad);
+	}
+	getTrackpad() {
+		return this.trackpad;
 	}
 }
 

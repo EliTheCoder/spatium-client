@@ -1,3 +1,7 @@
+html {
+	overflow: hidden;
+}
+
 html,
 body {
 	height: 100%;
@@ -6,6 +10,7 @@ body {
 }
 
 body {
+	overflow: auto;
 	margin: 0;
 	display: flex;
 

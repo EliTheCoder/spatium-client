@@ -82,6 +82,7 @@ export default class Board extends EventEmitter {
 	private possibleMoves: Move[] = [];
 	private lastMove: Move | null = null;
 	private possibleMovesCache = new Map<number, Move[]>();
+	private arrows: Arrow[] = [];
 	private p: p5;
 	constructor(p: p5, originPoint: Vec = new Vec(), initialState?: string) {
 		super();

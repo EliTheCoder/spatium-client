@@ -14,7 +14,8 @@ export function overlay(p: p5, world: World) {
 	p.fill(0, 0, 255, 255);
 	p.text(`FPS: ${frameRate}`, 20, 20);
 	let mouse = screen2world(p.mouseX, p.mouseY, world.getCamera());
-	p.text(`Mouse: ${Math.floor(mouse.x)}, ${Math.floor(mouse.y)}`, 20, 50);
+	p.text(`Mouse: ${Math.floor(mouse.x)}, ${Math.floor(mouse.y)}`, 20, 60);
+	p.text(`Trackpad (alt): ${world.getTrackpad()}`, 20, 100);
 	let worldCoords: Vec;
 	for (let board of world.getBoards()) {
 		if (board.board === undefined) continue;
@@ -32,7 +33,7 @@ export function overlay(p: p5, world: World) {
 				worldCoords.y
 			)}, ${Math.floor(worldCoords.z)}, ${Math.floor(worldCoords.w)}`,
 			20,
-			80
+			140
 		);
 	p.pop();
 }
