@@ -43,8 +43,7 @@ export default class World extends EventEmitter {
 		this.p.mouseWheel = (event: WheelEvent) => {
 			const dz = event.deltaY / -500;
 			const oldZ = this.camera.z;
-			if (!this.trackpad || this.p.keyIsDown(this.p.CONTROL))
-				this.camera.z *= 1 + dz;
+			if (!this.trackpad || event.ctrlKey) this.camera.z *= 1 + dz;
 			if (this.trackpad && !this.p.keyIsDown(this.p.CONTROL)) {
 				this.camera.x += (event.deltaX / this.camera.z) * 2;
 				this.camera.y += (event.deltaY / this.camera.z) * 2;

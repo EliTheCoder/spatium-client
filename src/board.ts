@@ -4,6 +4,7 @@ import { Camera, screen2world } from "./world";
 import { drawPlaceholders } from "./placeholder";
 import { tile } from "./tile";
 import EventEmitter from "eventemitter3";
+import Arrow from "./arrow";
 
 const squareSize = 50;
 
@@ -83,6 +84,7 @@ export default class Board extends EventEmitter {
 	private lastMove: Move | null = null;
 	private possibleMovesCache = new Map<number, Move[]>();
 	private arrows: Arrow[] = [];
+	private currentArrow: null | Vec = null;
 	private p: p5;
 	constructor(p: p5, originPoint: Vec = new Vec(), initialState?: string) {
 		super();
@@ -177,6 +179,10 @@ export default class Board extends EventEmitter {
 			this.originPoint
 		);
 
+		for (let arrow of this.arrows) {
+			arrow.draw(this.p, this.game.getSize(), squareSize);
+		}
+
 		// Drawing the currently held piece under mouse
 		let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
 		if (
@@ -212,11 +218,15 @@ export default class Board extends EventEmitter {
 		}
 	}
 	mousePressed(p: p5, event: MouseEvent, camera: Camera) {
-		if (event.button !== 0) return;
+		if (event.button !== 0 && event.button !== 2) return;
 		const worldVec = screen2world(p.mouseX, p.mouseY, camera).add(
 			this.originPoint.scale(-1)
 		);
 		let pos = pix2board(worldVec, this.game.getSize());
+		if (event.button === 2) {
+			this.currentArrow = pos;
+			return;
+		}
 		if (!this.game.isInBounds(pos)) {
 			this.selected = null;
 			this.holding = null;
@@ -249,11 +259,15 @@ export default class Board extends EventEmitter {
 		}
 	}
 	mouseReleased(p: p5, event: MouseEvent, camera: Camera) {
-		if (event.button !== 0) return;
+		if (event.button !== 0 && event.button !== 2) return;
 		const worldVec = screen2world(p.mouseX, p.mouseY, camera).add(
 			this.originPoint.scale(-1)
 		);
 		let pos = pix2board(worldVec, this.game.getSize());
+		if (event.button === 2 && this.currentArrow !== null) {
+			this.arrows.push(new Arrow(this.currentArrow, pos));
+			this.currentArrow = null;
+		}
 		if (!this.game.isInBounds(pos)) {
 			this.holding = null;
 			this.selected = null;
