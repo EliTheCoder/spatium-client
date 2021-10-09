@@ -158,6 +158,7 @@ export default class Board extends EventEmitter {
 		// Get world coordinates of the mouse
 		let worldVec = screen2world(this.p.mouseX, this.p.mouseY, camera);
 		const [cx, cy] = [worldVec.x, worldVec.y];
+		const boardVec = pix2board(worldVec, this.game.getSize());
 
 		// Drawing highlight under the mouse
 		this.p.noStroke();
@@ -179,8 +180,19 @@ export default class Board extends EventEmitter {
 			this.originPoint
 		);
 
+		// Drawing arrows for each possible move
 		for (let arrow of this.arrows) {
 			arrow.draw(this.p, this.game.getSize(), squareSize);
+		}
+
+		// Drawing currently drawing arrow
+		if (this.currentArrow !== null) {
+			new Arrow(this.currentArrow, boardVec).draw(
+				this.p,
+				this.game.getSize(),
+				squareSize,
+				false
+			);
 		}
 
 		// Drawing the currently held piece under mouse
@@ -223,14 +235,14 @@ export default class Board extends EventEmitter {
 			this.originPoint.scale(-1)
 		);
 		let pos = pix2board(worldVec, this.game.getSize());
-		if (event.button === 2) {
-			this.currentArrow = pos;
-			return;
-		}
 		if (!this.game.isInBounds(pos)) {
 			this.selected = null;
 			this.holding = null;
 			this.updatePossibleMoves();
+			return;
+		}
+		if (event.button === 2) {
+			this.currentArrow = pos;
 			return;
 		}
 		if (
@@ -264,14 +276,16 @@ export default class Board extends EventEmitter {
 			this.originPoint.scale(-1)
 		);
 		let pos = pix2board(worldVec, this.game.getSize());
-		if (event.button === 2 && this.currentArrow !== null) {
-			this.arrows.push(new Arrow(this.currentArrow, pos));
-			this.currentArrow = null;
-		}
 		if (!this.game.isInBounds(pos)) {
 			this.holding = null;
 			this.selected = null;
+			this.currentArrow = null;
 			this.updatePossibleMoves();
+			return;
+		}
+		if (event.button === 2 && this.currentArrow !== null) {
+			this.arrows.push(new Arrow(this.currentArrow, pos));
+			this.currentArrow = null;
 			return;
 		}
 		if (this.selected && this.selected.equals(pos) && !this.preSelected) {

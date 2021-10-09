@@ -11,7 +11,6 @@ export default class GameBoard extends EventEmitter {
 	constructor(p: p5, url: string, originPoint: Vec = new Vec()) {
 		super();
 		let wsUrl = new URL(url);
-		console.log(wsUrl);
 		if (wsUrl.port === "") wsUrl.port = "9024";
 		this.socket = new GameSocket(wsUrl.toString());
 		this.board;
