@@ -8,7 +8,7 @@
 	},
 	"dependencies": {
 		"eventemitter3": "^4.0.7",
-		"hika": "^1.1.3",
+		"hika": "^1.1.5",
 		"p5": "^1.4.0",
 		"parcel": "^2.0.0-rc.0",
 		"typescript": "^4.1.3"
