@@ -242,8 +242,16 @@ export default class Board extends EventEmitter {
 			return;
 		}
 		if (event.button === 2) {
-			this.currentArrow = pos;
+			this.selected = null;
+			if (this.holding === null) {
+				this.currentArrow = pos;
+			} else {
+				this.holding = null;
+			}
+			this.updatePossibleMoves();
 			return;
+		} else {
+			this.arrows = [];
 		}
 		if (
 			this.game.getPiece(pos) !== null &&
@@ -284,6 +292,13 @@ export default class Board extends EventEmitter {
 			return;
 		}
 		if (event.button === 2 && this.currentArrow !== null) {
+			for (let i = 0; i < this.arrows.length; i++) {
+				if (this.arrows[i].equals(new Arrow(this.currentArrow, pos))) {
+					this.arrows.splice(i, 1);
+					this.currentArrow = null;
+					return;
+				}
+			}
 			this.arrows.push(new Arrow(this.currentArrow, pos));
 			this.currentArrow = null;
 			return;
