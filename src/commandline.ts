@@ -1,6 +1,7 @@
 import EventEmitter from "eventemitter3";
 import { Move, Vec } from "hika";
 import p5 from "p5";
+import * as Commands from "./commands";
 import World from "./world";
 
 export default class CommandLine extends EventEmitter {
@@ -23,7 +24,12 @@ export default class CommandLine extends EventEmitter {
 		this.pos = pos;
 		this.size = size;
 		this.cursor = new Cursor(this.p);
-		this.dispatcher = new CommandDispatcher(world);
+		this.messageBox = new MessageBox(
+			this.p,
+			this.pos.add(new Vec(0, -100)),
+			this.size
+		);
+		this.dispatcher = new CommandDispatcher(world, this.messageBox);
 	}
 	draw() {
 		this.p.push();
@@ -34,10 +40,12 @@ export default class CommandLine extends EventEmitter {
 		this.p.rect(this.pos.x, this.pos.y, this.size.x, this.size.y, 10);
 		this.p.pop();
 		this.drawText();
+		this.messageBox.draw();
 	}
 	private drawText() {
 		this.p.push();
 		this.p.fill(this.text ? 255 : 100);
+		this.p.noStroke();
 		this.p.textSize(20);
 		this.p.textFont("monospace");
 		this.p.text(
@@ -84,22 +92,26 @@ export default class CommandLine extends EventEmitter {
 		}
 	}
 	run(command: string = this.text) {
-		let commandParts = command.split(" ");
+		let commandParts = command.toLowerCase().split(" ");
 		let id = commandParts[0];
 		let args = commandParts.slice(1);
 		this.text = "";
 		console.log("Dispatching command: " + id);
-		this.dispatcher.run(id, args);
+		return this.dispatcher.run(id, args);
 	}
 }
 
 export class CommandDispatcher extends EventEmitter {
 	private commands: Map<string, Command> = new Map<string, Command>();
 	private aliases: Map<string, string> = new Map<string, string>();
-	constructor(world: World) {
+	private commandDataProvider: Map<string, any> = new Map<string, any>();
+	constructor(world: World, messageBox: MessageBox) {
 		super();
-		this.register(new ConnectCommand(world));
-		this.register(new MoveCommand(world));
+		this.commandDataProvider.set("world", world);
+		this.commandDataProvider.set("messageBox", messageBox);
+		this.register(new Commands.ConnectCommand());
+		this.register(new Commands.MoveCommand());
+		this.register(new Commands.MessageCommand());
 	}
 	register(command: Command): boolean {
 		if (this.commands.has(command.id)) return false;
@@ -108,14 +120,16 @@ export class CommandDispatcher extends EventEmitter {
 			return true;
 		}
 	}
-	run(id: string, args: string[]): string | null | undefined {
+	run(id: string, args: string[]): Promise<boolean> {
 		id = id.toLowerCase();
 		if (this.commands.has(id)) {
-			return this.commands.get(id).run(args);
+			return this.commands.get(id).run(args, this.commandDataProvider);
 		} else if (this.aliases.has(id)) {
-			return this.commands.get(this.aliases.get(id)).run(args);
+			return this.commands
+				.get(this.aliases.get(id))
+				.run(args, this.commandDataProvider);
 		} else {
-			return undefined;
+			return new Promise((resolve, reject) => resolve(false));
 		}
 	}
 	has(id: string): boolean {
@@ -130,57 +144,12 @@ export class CommandDispatcher extends EventEmitter {
 	}
 }
 
-interface Command {
+export interface Command {
 	id: string;
-	run(args?: string[]): string | null;
-}
-
-class ConnectCommand implements Command {
-	id: string = "connect";
-	world: World;
-	constructor(world: World) {
-		this.world = world;
-	}
-	run(args: string[]): string | null {
-		if (args.length === 0) return "Usage: connect <ip>";
-		else {
-			this.world.addBoard(args[0]);
-			return null;
-		}
-	}
-}
-
-class MoveCommand implements Command {
-	id: string = "move";
-	world: World;
-	constructor(world: World) {
-		this.world = world;
-	}
-	run(args: string[]): string | null {
-		if (args.length === 0) return this.usage();
-		let numberArgs = args.map(arg => parseInt(arg));
-		this.world
-			.getBoards()[0]
-			.board.move(
-				new Move(
-					new Vec(
-						numberArgs[0],
-						numberArgs[1],
-						numberArgs[2],
-						numberArgs[3]
-					),
-					new Vec(
-						numberArgs[4],
-						numberArgs[5],
-						numberArgs[6],
-						numberArgs[7]
-					)
-				)
-			);
-	}
-	private usage() {
-		return "Usage: move <x1> <y1> <z1> <w1> <x2> <y2> <z2> <w2>";
-	}
+	run(
+		args: string[],
+		commandDataProvider: Map<string, any>
+	): Promise<boolean>;
 }
 
 class Cursor {
@@ -194,6 +163,7 @@ class Cursor {
 		this.p.push();
 		this.p.fill(255);
 		this.p.stroke(255);
+		this.p.strokeWeight(2);
 		this.p.textSize(20);
 		this.p.textFont("monospace");
 		this.p.text(
@@ -216,13 +186,13 @@ class Cursor {
 	}
 }
 
-enum MessageStatus {
+export enum MessageStatus {
 	ERROR = 0,
 	SUCCESS = 1,
 	INFO = 2
 }
 
-class MessageBox {
+export class MessageBox {
 	private readonly p: p5;
 	private pos: Vec;
 	private size: Vec;
@@ -237,31 +207,53 @@ class MessageBox {
 		this.p.push();
 		this.p.colorMode(this.p.HSB, 255);
 		let fillColor: p5.Color;
+		let strokeColor: p5.Color;
 		switch (this.messages[0].getStatus()) {
 			case MessageStatus.ERROR:
-				fillColor = this.p.color(0, 100, 200);
+				fillColor = this.p.color(0, 100, 150);
+				strokeColor = this.p.color(0, 100, 100);
 				break;
 			case MessageStatus.SUCCESS:
-				fillColor = this.p.color(100, 100, 200);
+				fillColor = this.p.color(100, 100, 150);
+				strokeColor = this.p.color(100, 100, 100);
 				break;
 			case MessageStatus.INFO:
 				fillColor = this.p.color(150, 20, 150);
+				strokeColor = this.p.color(150, 20, 100);
 		}
 		this.p.fill(fillColor);
-		fillColor.setBlue(255);
-		this.p.stroke(fillColor);
+		this.p.stroke(strokeColor);
+		this.p.strokeWeight(4);
+		this.p.rect(this.pos.x, this.pos.y, this.size.x, this.size.y, 10);
+		this.drawText();
 		this.messages[0].decrementTime();
 		if (this.messages[0].timeIsUp()) {
 			this.messages.shift();
 		}
 	}
+	private drawText() {
+		this.p.push();
+		this.p.fill(255);
+		this.p.noStroke();
+		this.p.textSize(20);
+		this.p.textFont("monospace");
+		this.p.text(
+			this.messages[0].getText(),
+			this.pos.x + 20,
+			this.pos.y + 35
+		);
+		this.p.pop();
+	}
+	addMessage(message: Message) {
+		this.messages.push(message);
+	}
 }
 
-class Message {
+export class Message {
 	private readonly status: MessageStatus;
 	private readonly text: string;
 	private time: number;
-	constructor(status: MessageStatus, text: string, time: number = 0) {
+	constructor(status: MessageStatus, text: string, time: number = 180) {
 		this.status = status;
 		this.text = text;
 		this.time = time;

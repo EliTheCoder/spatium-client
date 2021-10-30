@@ -65,7 +65,9 @@ export default class World extends EventEmitter {
 		this.p.pop();
 	}
 	addBoard(url: string) {
-		this.boards.push(new GameBoard(this.p, url));
+		let newBoard = new GameBoard(this.p, url);
+		this.boards.push(newBoard);
+		return newBoard;
 	}
 	getCamera() {
 		return this.camera;
