@@ -1,7 +1,5 @@
 import { convertDimension } from "./sketch";
 import p5 from "p5";
-import Board, { board2pix } from "./board";
-import GameSocket from "./gamesocket";
 import GameBoard from "./gameboard";
 import EventEmitter from "eventemitter3";
 import { Vec } from "hika";
@@ -21,7 +19,7 @@ export default class World extends EventEmitter {
 		this.p = p;
 		let wsUrl = new URL(window.location.href).searchParams.get("url");
 		let wsUrlString = wsUrl != null ? wsUrl : "wss://spatiumchess.app";
-		this.boards.push(new GameBoard(this.p, wsUrlString));
+		// this.boards.push(new GameBoard(this.p, wsUrlString));
 	}
 	draw() {
 		this.p.push();
@@ -64,41 +62,10 @@ export default class World extends EventEmitter {
 			this.camera.y += dy * (cy / 1080);
 		};
 
-		this.p.touchStarted = (event: MouseEvent) => {
-			if (this.p.mouseButton === this.p.CENTER) {
-				this.dragging = true;
-			}
-			for (let gameBoard of this.boards) {
-				if (gameBoard.isInitialized())
-					gameBoard.board.mousePressed(this.p, event, this.camera);
-			}
-			return false;
-		};
-
-		this.p.touchEnded = (event: MouseEvent) => {
-			if (this.p.mouseButton === this.p.CENTER) {
-				this.dragging = false;
-			}
-			for (let gameBoard of this.boards) {
-				if (gameBoard.isInitialized())
-					gameBoard.board.mouseReleased(this.p, event, this.camera);
-			}
-			return false;
-		};
-
-		this.p.keyPressed = () => {
-			if (this.p.keyCode === this.p.LEFT_ARROW) {
-				this.camera.r += Math.PI / 6;
-			}
-			if (this.p.keyCode === this.p.RIGHT_ARROW) {
-				this.camera.r -= Math.PI / 6;
-			}
-			if (this.p.keyCode === this.p.ALT) {
-				this.toggleTrackpad();
-			}
-		};
-
 		this.p.pop();
+	}
+	addBoard(url: string) {
+		this.boards.push(new GameBoard(this.p, url));
 	}
 	getCamera() {
 		return this.camera;
@@ -111,6 +78,38 @@ export default class World extends EventEmitter {
 	}
 	getTrackpad() {
 		return this.trackpad;
+	}
+	touchStarted(event: MouseEvent) {
+		if (this.p.mouseButton === this.p.CENTER) {
+			this.dragging = true;
+		}
+		for (let gameBoard of this.boards) {
+			if (gameBoard.isInitialized())
+				gameBoard.board.mousePressed(this.p, event, this.camera);
+		}
+		return false;
+	}
+
+	touchEnded(event: MouseEvent) {
+		if (this.p.mouseButton === this.p.CENTER) {
+			this.dragging = false;
+		}
+		for (let gameBoard of this.boards) {
+			if (gameBoard.isInitialized())
+				gameBoard.board.mouseReleased(this.p, event, this.camera);
+		}
+		return false;
+	}
+	keyPressed() {
+		if (this.p.keyCode === this.p.LEFT_ARROW) {
+			this.camera.r += Math.PI / 6;
+		}
+		if (this.p.keyCode === this.p.RIGHT_ARROW) {
+			this.camera.r -= Math.PI / 6;
+		}
+		if (this.p.keyCode === this.p.ALT) {
+			this.toggleTrackpad();
+		}
 	}
 }
 
