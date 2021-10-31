@@ -225,6 +225,7 @@ export class MessageBox {
 		this.p.stroke(strokeColor);
 		this.p.strokeWeight(4);
 		this.p.rect(this.pos.x, this.pos.y, this.size.x, this.size.y, 10);
+		this.p.pop();
 		this.drawText();
 		this.messages[0].decrementTime();
 		if (this.messages[0].timeIsUp()) {

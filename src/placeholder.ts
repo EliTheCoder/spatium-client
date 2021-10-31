@@ -26,6 +26,7 @@ function placeholder(
 	let { x, y } = board2pix(move.dst, game.getSize());
 	p.fill(160, 192, 128, 192);
 	p.stroke(0, 0, 255, 192);
+	p.strokeWeight(2);
 	if (game.getPiece(move.dst) === null) {
 		p.ellipse(
 			x + squareSize / 2 + originPoint.x,

@@ -12,6 +12,9 @@ export function overlay(p: p5, world: World) {
 	p.textAlign(p.LEFT, p.TOP);
 	p.textSize(32);
 	p.fill(0, 0, 255, 255);
+	p.stroke(0);
+	p.strokeWeight(2);
+	p.textFont("monospace");
 	p.text(`FPS: ${frameRate}`, 20, 20);
 	let mouse = screen2world(p.mouseX, p.mouseY, world.getCamera());
 	p.text(`Mouse: ${Math.floor(mouse.x)}, ${Math.floor(mouse.y)}`, 20, 60);
