@@ -1,12 +1,10 @@
 import p5 from "p5";
 import { Game, Move, Vec } from "hika";
-import { Camera, screen2world } from "./world";
+import { Camera, real2world, screen2world } from "./world";
 import { drawPlaceholders } from "./placeholder";
 import { tile } from "./tile";
 import EventEmitter from "eventemitter3";
 import Arrow from "./arrow";
-
-const squareSize = 50;
 
 // Loading images for the pieces
 let images: { [key: string]: p5.Image } = {};
@@ -21,7 +19,7 @@ export function loadImages(p: p5) {
 }
 
 // Function that takes board coordinates and returns pixel coordinates
-export function board2pix(pos: Vec, size: Vec) {
+export function board2pix(pos: Vec, size: Vec, squareSize: number) {
 	const nPos = new Vec(
 		pos.x,
 		-pos.y + size.y - 1,
@@ -35,7 +33,7 @@ export function board2pix(pos: Vec, size: Vec) {
 }
 
 // Function that takes pixel coordinates and returns board coordinates
-export function pix2board(pos: Vec, size: Vec) {
+export function pix2board(pos: Vec, size: Vec, squareSize: number) {
 	const nPos = new Vec(
 		mod(Math.floor(pos.x / squareSize), size.x + 1),
 		mod(Math.floor(pos.y / squareSize), size.y + 1),
@@ -86,6 +84,7 @@ export default class Board extends EventEmitter {
 	private arrows: Arrow[] = [];
 	private currentArrow: null | Vec = null;
 	private p: p5;
+	private squareSize: number = 50;
 	constructor(p: p5, originPoint: Vec = new Vec(), initialState?: string) {
 		super();
 		if (initialState == null) {
@@ -144,7 +143,7 @@ export default class Board extends EventEmitter {
 							this.game,
 							this.selected,
 							this.holding,
-							squareSize,
+							this.squareSize,
 							images,
 							this.lastMove,
 							camera,
@@ -156,18 +155,25 @@ export default class Board extends EventEmitter {
 		}
 
 		// Get world coordinates of the mouse
-		let worldVec = screen2world(this.p.mouseX, this.p.mouseY, camera);
+		let worldVec = real2world(
+			new Vec(this.p.mouseX, this.p.mouseY),
+			camera
+		);
 		const [cx, cy] = [worldVec.x, worldVec.y];
-		const boardVec = pix2board(worldVec, this.game.getSize());
+		const boardVec = pix2board(
+			worldVec,
+			this.game.getSize(),
+			this.squareSize
+		);
 
 		// Drawing highlight under the mouse
 		this.p.noStroke();
 		this.p.fill(0, 0, 255, 64);
 		this.p.rect(
-			cx - mod(cx, squareSize),
-			cy - mod(cy, squareSize),
-			squareSize,
-			squareSize,
+			cx - mod(cx, this.squareSize),
+			cy - mod(cy, this.squareSize),
+			this.squareSize,
+			this.squareSize,
 			4
 		);
 
@@ -176,13 +182,13 @@ export default class Board extends EventEmitter {
 			this.p,
 			this.game,
 			this.possibleMoves,
-			squareSize,
+			this.squareSize,
 			this.originPoint
 		);
 
 		// Drawing arrows for each possible move
 		for (let arrow of this.arrows) {
-			arrow.draw(this.p, this.game.getSize(), squareSize);
+			arrow.draw(this.p, this.game.getSize(), this.squareSize);
 		}
 
 		// Drawing currently drawing arrow
@@ -190,13 +196,16 @@ export default class Board extends EventEmitter {
 			new Arrow(this.currentArrow, boardVec).draw(
 				this.p,
 				this.game.getSize(),
-				squareSize,
+				this.squareSize,
 				false
 			);
 		}
 
 		// Drawing the currently held piece under mouse
-		let heldPiecePos = new Vec(cx - squareSize / 2, cy - squareSize / 2);
+		let heldPiecePos = new Vec(
+			cx - this.squareSize / 2,
+			cy - this.squareSize / 2
+		);
 		if (
 			this.holding !== null &&
 			this.game.getPiece(this.holding) !== null
@@ -221,20 +230,26 @@ export default class Board extends EventEmitter {
 			// Don't ask me why this works, but it centers the piece on the tile
 			const [dx, dy] = [
 				((Math.sqrt(2) / 2) * Math.cos(camera.r + Math.PI / 4) - 0.5) *
-					squareSize,
+					this.squareSize,
 				((Math.sqrt(2) / 2) * Math.sin(camera.r + Math.PI / 4) - 0.5) *
-					squareSize
+					this.squareSize
 			];
-			this.p.image(pieceImage, cx + dx, cy + dy, squareSize, squareSize);
+			this.p.image(
+				pieceImage,
+				cx + dx,
+				cy + dy,
+				this.squareSize,
+				this.squareSize
+			);
 			this.p.pop();
 		}
 	}
 	mousePressed(p: p5, event: MouseEvent, camera: Camera) {
 		if (event.button !== 0 && event.button !== 2) return;
-		const worldVec = screen2world(p.mouseX, p.mouseY, camera).add(
+		const worldVec = real2world(new Vec(p.mouseX, p.mouseY), camera).add(
 			this.originPoint.scale(-1)
 		);
-		let pos = pix2board(worldVec, this.game.getSize());
+		let pos = pix2board(worldVec, this.game.getSize(), this.squareSize);
 		if (!this.game.isInBounds(pos)) {
 			this.selected = null;
 			this.holding = null;
@@ -280,10 +295,10 @@ export default class Board extends EventEmitter {
 	}
 	mouseReleased(p: p5, event: MouseEvent, camera: Camera) {
 		if (event.button !== 0 && event.button !== 2) return;
-		const worldVec = screen2world(p.mouseX, p.mouseY, camera).add(
+		const worldVec = real2world(new Vec(p.mouseX, p.mouseY), camera).add(
 			this.originPoint.scale(-1)
 		);
-		let pos = pix2board(worldVec, this.game.getSize());
+		let pos = pix2board(worldVec, this.game.getSize(), this.squareSize);
 		if (!this.game.isInBounds(pos)) {
 			this.holding = null;
 			this.selected = null;
@@ -322,6 +337,9 @@ export default class Board extends EventEmitter {
 	}
 	getOriginPoint(): Vec {
 		return this.originPoint;
+	}
+	getSquareSize(): number {
+		return this.squareSize;
 	}
 }
 

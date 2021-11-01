@@ -16,7 +16,7 @@ export function tile(
 	originPoint: Vec
 ) {
 	// Getting world pixel coordinates of the tile
-	let cPos = board2pix(pos, game.getSize()).add(originPoint);
+	let cPos = board2pix(pos, game.getSize(), squareSize).add(originPoint);
 	let size = game.getSize();
 
 	// Drawing the tile

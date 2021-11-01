@@ -1,4 +1,4 @@
 import p5 from "p5";
-import {sketch} from "./sketch";
+import { Sketch } from "./sketch";
 
-new p5(sketch, document.getElementById("canvas") as HTMLElement);
+new p5(p => new Sketch(p), document.getElementById("canvas") as HTMLElement);

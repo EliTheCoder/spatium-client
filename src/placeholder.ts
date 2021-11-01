@@ -23,7 +23,7 @@ function placeholder(
 	squareSize: number,
 	originPoint: Vec
 ) {
-	let { x, y } = board2pix(move.dst, game.getSize());
+	let { x, y } = board2pix(move.dst, game.getSize(), squareSize);
 	p.fill(160, 192, 128, 192);
 	p.stroke(0, 0, 255, 192);
 	p.strokeWeight(2);
