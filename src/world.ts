@@ -3,7 +3,7 @@ import p5 from "p5";
 import GameBoard from "./gameboard";
 import EventEmitter from "eventemitter3";
 import { Vec } from "hika";
-import { board2pix } from "./board";
+import Board, { board2pix } from "./board";
 
 export type Camera = { x: number; y: number; z: number; r: number };
 
@@ -15,7 +15,7 @@ export default class World extends EventEmitter {
 	private dragging = false;
 	private trackpad = false;
 	private nextOriginPoint: Vec = new Vec();
-	private boards: GameBoard[] = [];
+	private boards: (GameBoard | Board)[] = [];
 	constructor(p: p5) {
 		super();
 		this.p = p;
@@ -36,8 +36,10 @@ export default class World extends EventEmitter {
 		this.p.scale(this.camera.z);
 		this.p.translate(-this.camera.x, -this.camera.y);
 		this.p.rotate(this.camera.r);
-		for (let gameBoard of this.boards) {
-			if (gameBoard.isInitialized()) gameBoard.board.draw(this.camera);
+		for (let b of this.boards) {
+			if (b instanceof GameBoard && b.isInitialized())
+				b.board.draw(this.camera);
+			if (b instanceof Board) b.draw(this.camera);
 		}
 
 		this.p.mouseWheel = (event: WheelEvent) => {
@@ -66,19 +68,28 @@ export default class World extends EventEmitter {
 
 		this.p.pop();
 	}
-	addBoard(url: string) {
-		let newBoard = new GameBoard(this.p, url, this.nextOriginPoint);
-		this.boards.push(newBoard);
-		newBoard.on("initialize", () => {
-			const size = newBoard.board.getGame().getSize();
-			const corner = board2pix(
-				size,
-				size,
-				newBoard.board.getSquareSize()
-			);
-			this.nextOriginPoint = this.nextOriginPoint.add(new Vec(corner.x));
+	addGameBoard(url: string) {
+		let newGameBoard = new GameBoard(this.p, url, this.nextOriginPoint);
+		this.boards.push(newGameBoard);
+		newGameBoard.on("initialize", () => {
+			this.updateOriginPoint(newGameBoard.board);
 		});
+		return newGameBoard;
+	}
+	addBoard(initialState: string) {
+		let newBoard = new Board(this.p, this.nextOriginPoint, initialState);
+		this.boards.push(newBoard);
+		this.updateOriginPoint(newBoard);
 		return newBoard;
+	}
+	private updateOriginPoint(board: Board) {
+		const size = board.getGame().getSize();
+		const corner = board2pix(
+			size.add(new Vec(3, 0, -1, -1)),
+			size,
+			board.getSquareSize()
+		);
+		this.nextOriginPoint = this.nextOriginPoint.add(new Vec(corner.x));
 	}
 	getCamera() {
 		return this.camera;
@@ -96,10 +107,12 @@ export default class World extends EventEmitter {
 		if (this.p.mouseButton === this.p.CENTER) {
 			this.dragging = true;
 		}
-		for (let gameBoard of this.boards) {
-			if (gameBoard.isInitialized())
-				gameBoard.board.mousePressed(this.p, event, this.camera);
+		for (let b of this.boards) {
+			if (b instanceof GameBoard && b.isInitialized())
+				b.board.mousePressed(this.p, event, this.camera);
+			if (b instanceof Board) b.mousePressed(this.p, event, this.camera);
 		}
+
 		return false;
 	}
 
@@ -107,9 +120,10 @@ export default class World extends EventEmitter {
 		if (this.p.mouseButton === this.p.CENTER) {
 			this.dragging = false;
 		}
-		for (let gameBoard of this.boards) {
-			if (gameBoard.isInitialized())
-				gameBoard.board.mouseReleased(this.p, event, this.camera);
+		for (let b of this.boards) {
+			if (b instanceof GameBoard && b.isInitialized())
+				b.board.mouseReleased(this.p, event, this.camera);
+			if (b instanceof Board) b.mouseReleased(this.p, event, this.camera);
 		}
 		return false;
 	}

@@ -18,7 +18,7 @@ export class ConnectCommand implements Command {
 			return new Promise((resolve, reject) => {
 				commandDataProvider
 					.get("world")
-					.addBoard(args[0])
+					.addGameBoard(args[0])
 					.socket.on("initialize", () => {
 						resolve(true);
 						commandDataProvider

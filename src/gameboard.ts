@@ -13,7 +13,6 @@ export default class GameBoard extends EventEmitter {
 		let wsUrl = new URL(url);
 		if (wsUrl.port === "") wsUrl.port = "9024";
 		this.socket = new GameSocket(wsUrl.toString());
-		this.board;
 		this.socket.on("initialize", data => {
 			this.board = new Board(p, originPoint, data.initialState);
 			if (data.moves.length > 0) {
