@@ -25,13 +25,14 @@ export default class GameBoard extends EventEmitter {
 				this.socket.move(move);
 			});
 			this.status = Status.PLAYING;
+			this.emit("initialize");
 		});
 		this.socket.on("move", (data: { move: string; team: number }) => {
 			this.board.move(Move.deserialize(data.move));
 		});
 	}
 	isInitialized() {
-		return this.status === 1;
+		return this.status === Status.PLAYING;
 	}
 }
 

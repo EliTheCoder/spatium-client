@@ -10,8 +10,8 @@ export default class Arrow extends Move {
 		p.noFill();
 		p.stroke(128, 148, 148, 200);
 		p.strokeWeight(thick ? 10 : 8);
-		let src = board2pix(this.src, size);
-		let dst = board2pix(this.dst, size);
+		let src = board2pix(this.src, size, squareSize);
+		let dst = board2pix(this.dst, size, squareSize);
 
 		if (this.src.equals(this.dst)) {
 			p.strokeWeight(thick ? 7 : 5);
