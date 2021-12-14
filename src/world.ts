@@ -4,6 +4,7 @@ import GameBoard from "./gameboard";
 import EventEmitter from "eventemitter3";
 import { Vec } from "hika";
 import Board, { board2pix } from "./board";
+import { Socket } from "socket.io-client";
 
 export type Camera = { x: number; y: number; z: number; r: number };
 
@@ -16,6 +17,7 @@ export default class World extends EventEmitter {
 	private trackpad = false;
 	private nextOriginPoint: Vec = new Vec();
 	private boards: (GameBoard | Board)[] = [];
+	private sockets: Map<string, Socket> = new Map<string, Socket>();
 	constructor(p: p5) {
 		super();
 		this.p = p;
@@ -68,13 +70,15 @@ export default class World extends EventEmitter {
 
 		this.p.pop();
 	}
-	addGameBoard(url: string) {
-		let newGameBoard = new GameBoard(this.p, url, this.nextOriginPoint);
-		this.boards.push(newGameBoard);
-		newGameBoard.on("initialize", () => {
-			this.updateOriginPoint(newGameBoard.board);
+	joinRoom(socketId: string, roomId: string) {
+		if (!this.sockets.has(socketId)) return;
+		this.sockets.get(socketId).emit("joinRoom", roomId);
+		let newBoard = new Board(this.p, this.nextOriginPoint);
+		newBoard.on("initialize", () => {
+			this.updateOriginPoint(newBoard);
+			this.boards.push(newBoard);
 		});
-		return newGameBoard;
+		return newBoard;
 	}
 	addBoard(initialState: string) {
 		let newBoard = new Board(this.p, this.nextOriginPoint, initialState);

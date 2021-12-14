@@ -15,11 +15,11 @@ export class ConnectCommand implements Command {
 				);
 			return new Promise(resolve => resolve(false));
 		} else {
-			return new Promise((resolve, reject) => {
+			return new Promise(resolve => {
 				commandDataProvider
 					.get("world")
-					.addGameBoard(args[0])
-					.socket.on("initialize", () => {
+					.addOnlineBoard(args[0])
+					.on("connect", () => {
 						resolve(true);
 						commandDataProvider
 							.get("messageBox")

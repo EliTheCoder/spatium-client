@@ -6,27 +6,28 @@ import { Move, Vec } from "hika";
 
 export default class GameBoard extends EventEmitter {
 	board: Board;
-	socket: GameSocket;
+	gameSocket: GameSocket;
+	id: string;
 	status: Status = 0;
 	constructor(p: p5, url: string, originPoint: Vec = new Vec()) {
 		super();
 		let wsUrl = new URL(url);
-		if (wsUrl.port === "") wsUrl.port = "9024";
-		this.socket = new GameSocket(wsUrl.toString());
-		this.socket.on("initialize", data => {
+		if (!wsUrl.port) wsUrl.port = "9024";
+		this.gameSocket = new GameSocket(wsUrl.toString());
+		this.gameSocket.on("state", data => {
 			this.board = new Board(p, originPoint, data.initialState);
-			if (data.moves.length > 0) {
-				for (let i of data.moves) {
+			if (data.moveHistory.length > 0) {
+				for (let i of data.moveHistory) {
 					this.board.move(Move.deserialize(i));
 				}
 			}
 			this.board.on("move", (move: Move) => {
-				this.socket.move(move);
+				this.gameSocket.move(move, this.id);
 			});
 			this.status = Status.PLAYING;
 			this.emit("initialize");
 		});
-		this.socket.on("move", (data: { move: string; team: number }) => {
+		this.gameSocket.on("move", (data: { move: string; team: number }) => {
 			this.board.move(Move.deserialize(data.move));
 		});
 	}
