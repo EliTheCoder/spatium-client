@@ -4,7 +4,10 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/EliTheCoder/spatium-client?style=for-the-badge)
 ![GitHub lines of code](https://img.shields.io/tokei/lines/github/EliTheCoder/spatium-client?style=for-the-badge)
 <br />
-Spatium is a chess GUI that is capable of creating a usable 4-dimensional chessboard.
+### Spatium is a multiplayer chess GUI that is capable of creating a usable 4-dimensional chessboard.
+
+## Demo
+https://e.elithecoder.com/BHGXd.mp4
 
 ## Installation
 ### Requirements
